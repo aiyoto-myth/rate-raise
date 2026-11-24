@@ -1,0 +1,962 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rate Raise: raise your regular clients to today's rate, one letter each</title>
+<meta name="description" content="Free tool for cleaners, lawn, pool and window pros with regular clients. See who is under your rate, how much to raise each client, how many could leave before you'd earn less, and get a letter or text for every one.">
+<link rel="canonical" href="https://samsbench.com/rate-raise/">
+<meta property="og:title" content="Rate Raise: raise your old clients to today's rate">
+<meta property="og:description" content="Who to raise, by how much, how many could leave before you lose money, and a letter for each client. Free, no sign-up.">
+<meta property="og:url" content="https://samsbench.com/rate-raise/">
+<meta property="og:image" content="https://samsbench.com/rate-raise/og.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f3efe6; --card:#fffdf8; --ink:#17202b; --ink2:#3b4654; --line:#d9d1c0; --line2:#c4b9a3;
+  --van:#14385c; --van2:#1d4f80; --tag:#ffd23f; --tagInk:#2b2200; --red:#b3361f; --redBg:#fbe6df; --ok:#24704a; --okBg:#e2f1e7;
+  --focus:#1d4ed8;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 "Public Sans",system-ui,sans-serif}
+h1,h2,h3,.num{font-family:Archivo,"Arial Narrow",system-ui,sans-serif;font-stretch:88%;line-height:1.08;margin:0}
+h1{font-weight:900;font-size:clamp(32px,5.6vw,58px);letter-spacing:-.01em}
+h2{font-weight:800;font-size:clamp(22px,3vw,30px)}
+h3{font-weight:800;font-size:19px}
+p{margin:.4em 0}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 18px}
+.bar{background:var(--van);color:#fff}
+.bar .wrap{display:flex;align-items:center;gap:14px;min-height:54px}
+.logo{font-family:Archivo,sans-serif;font-stretch:110%;font-weight:900;font-size:20px;letter-spacing:.01em;display:flex;align-items:center;gap:8px;text-decoration:none}
+.logo i{display:inline-block;width:26px;height:16px;background:var(--tag);clip-path:polygon(7px 0,100% 0,100% 100%,7px 100%,0 50%);position:relative}
+.bar .sp{flex:1}
+.bar a.pro{color:var(--tag);font-weight:700;text-decoration:none;border:2px solid var(--tag);border-radius:999px;padding:3px 12px}
+.hero{padding:30px 0 10px}
+.hero p.lead{font-size:clamp(17px,2vw,20px);max-width:760px;color:var(--ink)}
+.grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,1fr);gap:22px;align-items:start;margin-top:18px}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:18px}
+.step{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--van);color:#fff;font-family:Archivo,sans-serif;font-weight:900;margin-right:8px;flex:none}
+.hrow{display:flex;align-items:center;margin-bottom:10px}
+label{font-weight:600}
+input[type=text],input[type=number],input[type=email],input[type=date],select,textarea{border:1.5px solid var(--line2);background:#fff;border-radius:9px;padding:9px 10px;min-height:44px;width:100%}
+textarea{min-height:120px;font-size:15px}
+.rate{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.rate .money{display:flex;align-items:center;border:2px solid var(--van);border-radius:10px;background:#fff;padding:0 10px;max-width:190px}
+.rate .money span{font-family:Archivo,sans-serif;font-weight:800;font-size:24px}
+.rate .money input{border:0;font-family:Archivo,sans-serif;font-weight:800;font-size:28px;min-height:52px;padding:4px 6px;width:110px}
+.rate .money input:focus{outline:none}
+.rate .money:focus-within{outline:3px solid var(--focus);outline-offset:2px}
+.help{font-size:15px;color:var(--ink2)}
+details.rules{margin-top:12px;border-top:1.5px dashed var(--line2);padding-top:10px}
+details.rules summary{font-weight:700;cursor:pointer;min-height:36px;display:flex;align-items:center}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:8px}
+.rgrid label{display:block;font-size:15px}
+.rgrid .help{font-size:13.5px;margin-top:2px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:8px 16px;border-radius:10px;border:2px solid var(--van);background:var(--van);color:#fff;font-weight:700;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--van)}
+.btn.small{min-height:38px;padding:5px 12px;font-size:15px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#exNote{background:var(--tag);color:var(--tagInk);border-radius:10px;padding:10px 14px;margin:0 0 12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-weight:600}
+#exNote .btn{background:var(--ink);border-color:var(--ink)}
+.cl{border:1.5px solid var(--line);border-radius:12px;background:#fff;margin-bottom:10px;overflow:hidden}
+.cl .f{display:grid;grid-template-columns:minmax(0,1.6fr) 96px 92px minmax(0,1.25fr) 78px 40px;gap:8px;padding:10px;align-items:end}
+.cl .f label{font-size:12.5px;font-weight:700;display:block;margin-bottom:2px;color:var(--ink2)}
+.cl .f input,.cl .f select{min-height:40px;padding:6px 8px}
+.cl .x{width:40px;height:40px;border:0;background:transparent;font-size:22px;border-radius:8px;color:var(--ink2)}
+.cl .x:hover{background:var(--redBg);color:var(--red)}
+.cl .res{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 12px;border-top:1.5px dashed var(--line);background:#faf7f0;font-size:15px}
+.cl .res .hr{font-weight:700}
+.cl .res .hr.low{color:var(--red)}
+.cl .res .hr.fine{color:var(--ok)}
+.cl .res .steps{color:var(--ink2)}
+.cl.ex .f input{background:#fffbe8}
+.tag{display:inline-flex;align-items:center;font-family:Archivo,sans-serif;font-weight:900;font-size:18px;background:var(--tag);color:var(--tagInk);padding:3px 10px 3px 20px;clip-path:polygon(10px 0,100% 0,100% 100%,10px 100%,0 50%);position:relative;white-space:nowrap}
+.tag::before{content:"";position:absolute;left:9px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:#faf7f0}
+.tag.same{background:var(--okBg);color:var(--ok)}
+.old{text-decoration:line-through;text-decoration-thickness:2px;color:var(--ink2);font-weight:600}
+.addrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+#pasteBox{margin-top:10px}
+#sum{position:sticky;top:12px}
+#sum .card{border:2px solid var(--van)}
+.big{font-family:Archivo,sans-serif;font-stretch:80%;font-weight:900;font-size:clamp(40px,6vw,60px);line-height:1;color:var(--van)}
+.big.neg{color:var(--red)}
+.kv{display:grid;grid-template-columns:1fr auto;gap:4px 12px;margin-top:12px;font-size:15.5px}
+.kv b{font-family:Archivo,sans-serif;font-weight:800;font-size:17px;text-align:right}
+.risk{margin-top:14px;padding:12px;border-radius:10px;background:#eef3f8;border-left:5px solid var(--van)}
+.risk.bad{background:var(--redBg);border-left-color:var(--red)}
+.warn{color:var(--red);font-weight:700}
+.empty{color:var(--ink2)}
+#letters{margin-top:34px}
+.ltools{display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin:12px 0}
+.ltools > div{min-width:180px}
+.seg{display:inline-flex;border:2px solid var(--van);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:#fff;padding:8px 14px;min-height:42px;font-weight:700;color:var(--van)}
+.seg button[aria-pressed=true]{background:var(--van);color:#fff}
+.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.letter{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:0;display:flex;flex-direction:column}
+.letter header{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1.5px dashed var(--line)}
+.letter header h3{flex:1;font-size:18px}
+.letter .greet{display:flex;align-items:center;gap:6px;padding:8px 14px 0;font-size:14px;color:var(--ink2)}
+.letter .greet input{min-height:34px;padding:4px 8px;width:auto;flex:1;font-size:15px}
+.cl .res .chk{color:var(--red);font-weight:700}
+.letter pre{white-space:pre-wrap;font:15px/1.55 "Public Sans",system-ui,sans-serif;margin:0;padding:12px 14px;flex:1}
+.letter footer{display:flex;gap:6px;flex-wrap:wrap;padding:10px 12px;border-top:1.5px solid var(--line);background:#faf7f0;border-radius:0 0 12px 12px}
+.chip{border:1.5px solid var(--line2);background:#fff;border-radius:999px;padding:4px 11px;min-height:34px;font-size:14px;font-weight:600}
+.chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip.okc[aria-pressed=true]{background:var(--ok);border-color:var(--ok)}
+.chip.lv[aria-pressed=true]{background:var(--red);border-color:var(--red)}
+#outcome{margin:14px 0;padding:14px;border-radius:12px;background:var(--card);border:2px solid var(--ink)}
+details.tpl{margin:8px 0 14px}
+details.tpl summary{font-weight:700;cursor:pointer;min-height:36px;display:flex;align-items:center}
+.tokens{font-size:14px;color:var(--ink2)}
+.tokens code{background:#ece6d8;border-radius:4px;padding:1px 5px}
+#proSec{margin-top:40px;background:var(--van);color:#fff;border-radius:16px;padding:24px}
+#proSec h2{color:#fff}
+#proSec .price{font-family:Archivo,sans-serif;font-size:48px;font-weight:900;color:var(--tag)}
+#proSec ul{padding-left:20px}
+#proSec .btn{background:var(--tag);border-color:var(--tag);color:var(--tagInk)}
+#proSec .btn.ghost{background:transparent;color:#fff;border-color:#fff}
+#proSec input{border-color:#5d7fa3}
+#proSec .cols{display:grid;grid-template-columns:1.2fr 1fr;gap:24px}
+#proSec .ok{color:#a7e3b1;font-weight:700}
+#proSec .err{color:#ffc4b8;font-weight:700}
+footer.site{margin:40px 0 30px;font-size:15px}
+#toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-weight:600;max-width:92vw;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9}
+#toast.on{opacity:1}
+#printArea{display:none}
+@media (max-width:900px){
+  .grid{grid-template-columns:1fr}
+  #sum{position:static}
+}
+@media (max-width:640px){
+  .cl .f{grid-template-columns:1fr 1fr;}
+  .cl .f .nm{grid-column:1 / -1;display:flex;gap:8px;align-items:end}
+  .cl .f .nm > div{flex:1}
+  .cl .f .xcell{display:none}
+  .cl .f .nm .x{display:inline-block}
+  .lgrid{grid-template-columns:1fr}
+  #proSec .cols{grid-template-columns:1fr}
+  .wrap{padding:0 14px}
+}
+@media (min-width:641px){ .cl .f .nm .x{display:none} }
+@media print{
+  body{background:#fff}
+  body > *:not(#printArea){display:none!important}
+  #printArea{display:block}
+  .pl{page-break-after:always;font:12pt/1.6 Georgia,serif;white-space:pre-wrap;padding:24pt 10pt}
+  .pl:last-child{page-break-after:auto}
+}
+</style>
+</head>
+<body>
+<div class="bar"><div class="wrap">
+  <a class="logo" href="./"><i aria-hidden="true"></i>Rate Raise</a><span class="sp"></span><a class="pro" href="#proSec">Pro</a>
+</div></div>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>Bring your old clients up to today's rate.</h1>
+    <p class="lead">For cleaners, lawn, pool and window pros with regular clients. Put in your list and see who's under your rate, how much to raise each one, how many could leave before you'd earn less than today, and get a letter or text for every client.</p>
+  </section>
+
+  <div class="grid">
+    <div>
+      <section class="card" aria-labelledby="h1rate">
+        <div class="hrow"><span class="step">1</span><h2 id="h1rate">Your rate today</h2></div>
+        <div class="rate">
+          <label class="money" for="rate"><span id="curSym">$</span><input id="rate" type="text" inputmode="decimal" autocomplete="off" placeholder="60"></label>
+          <div style="flex:1 1 220px"><b>per hour of work</b>: what you'd charge a brand-new client today.
+            <div class="help">Price new jobs by the visit? Take a typical new price and divide by its hours. A 2-person crew for 1.5 hours is 3 hours of work.</div></div>
+        </div>
+        <details class="rules" id="rules">
+          <summary>Rules for the raise (biggest step, rounding, start date, your name)</summary>
+          <div class="rgrid">
+            <div><label for="cap">Biggest raise at one time</label><select id="cap"><option value="5">5%</option><option value="10">10%</option><option value="15">15%</option><option value="20">20%</option><option value="25">25%</option><option value="0">No limit</option></select>
+              <div class="help">Bigger gaps are split into steps.</div></div>
+            <div><label for="gap">Time between steps</label><select id="gap"><option value="3">3 months</option><option value="6">6 months</option><option value="12">12 months</option></select></div>
+            <div><label for="round">Round new prices to</label><select id="round"><option value="1">nearest 1</option><option value="5">nearest 5</option><option value="10">nearest 10</option></select></div>
+            <div><label for="skip">Skip raises smaller than</label><input id="skip" type="text" inputmode="decimal"></div>
+            <div><label for="loyal">Old clients pay less than new by</label><select id="loyal"><option value="0">0% (same as new)</option><option value="5">5%</option><option value="10">10%</option><option value="15">15%</option></select></div>
+            <div><label for="start">New prices start</label><input id="start" type="date"><div class="help" id="noticeHelp"></div></div>
+            <div><label for="months">Months a year you work</label><select id="months"><option value="12">All year</option><option value="10">10 months</option><option value="9">9 months</option><option value="8">8 months</option><option value="7">7 months</option><option value="6">6 months</option></select>
+              <div class="help">Lawn or pool season? Weekly then means about 4 visits a month, only in season.</div></div>
+            <div><label for="voice">Letters speak as</label><select id="voice"><option value="i">I (just me)</option><option value="we">We (my team)</option></select></div>
+            <div><label for="cur">Currency</label><select id="cur"><option value="$">$</option><option value="£">£</option><option value="€">€</option></select></div>
+            <div><label for="service">What you call a visit</label><input id="service" type="text" list="svcList" placeholder="cleaning"><datalist id="svcList"><option value="cleaning"><option value="lawn service"><option value="pool service"><option value="window cleaning"><option value="service"></datalist></div>
+            <div><label for="me">Your name (signs the letters)</label><input id="me" type="text" autocomplete="name"></div>
+            <div><label for="biz">Business name</label><input id="biz" type="text" autocomplete="organization"></div>
+          </div>
+        </details>
+      </section>
+
+      <section class="card" style="margin-top:16px" aria-labelledby="h2cl">
+        <div class="hrow"><span class="step">2</span><h2 id="h2cl">Your regular clients</h2></div>
+        <div id="exNote" hidden><span style="flex:1 1 240px">These are made-up clients so you can see how it works.</span><button class="btn small" id="btnMine">Start with my own clients</button></div>
+        <div id="clients"></div>
+        <div class="addrow">
+          <button class="btn ghost small" id="btnAdd">+ Add a client</button>
+          <button class="btn ghost small" id="btnPaste" aria-expanded="false" aria-controls="pasteBox">Paste a list from a spreadsheet</button>
+          <button class="btn ghost small" id="btnCsv">Download as CSV</button>
+        </div>
+        <div id="pasteBox" hidden>
+          <label for="pasteTxt">One client per line: <b>name, price per visit, hours of work, how often, client since (year, optional)</b></label>
+          <textarea id="pasteTxt" placeholder="Ann Miller	110	2.5	every 2 weeks	2019&#10;Okafor, 95, 1:30, monthly&#10;Lee	160	3	weekly"></textarea>
+          <div class="help">Copy the columns straight out of Excel or Google Sheets. "How often" understands weekly, every 2 weeks / biweekly / fortnightly, every 3 weeks, every 4 weeks, monthly, or "9 times a year".</div>
+          <div class="row" style="margin-top:8px"><button class="btn small" id="btnPasteGo">Add these clients</button><span id="pasteMsg" aria-live="polite"></span></div>
+        </div>
+      </section>
+    </div>
+
+    <aside id="sum" aria-labelledby="hSum"><div class="card" id="sumCard"></div></aside>
+  </div>
+
+  <section id="letters" aria-labelledby="hLet">
+    <div class="hrow"><span class="step">3</span><h2 id="hLet">A letter for each client</h2></div>
+    <div class="ltools">
+      <div><div style="font-weight:600;margin-bottom:4px">Send as</div><div class="seg" role="group" aria-label="Format"><button data-fmt="letter" aria-pressed="true">Letter / email</button><button data-fmt="text" aria-pressed="false">Text message</button></div></div>
+      <div style="flex:1 1 260px"><label for="reason">Reason you give</label><select id="reason">
+        <option value="costs">Costs went up (insurance, fuel, supplies)</option>
+        <option value="team">Paying my team fairly</option>
+        <option value="time">Prices haven't changed in a while</option>
+        <option value="custom">My own words…</option>
+        <option value="none">No reason</option></select></div>
+      <div class="row"><button class="btn small" id="btnCopyAll">Copy all</button><button class="btn ghost small" id="btnPrintAll">Print all letters</button></div>
+    </div>
+    <div id="reasonBox" hidden><label for="reasonTxt">Your reason, in your words</label><input id="reasonTxt" type="text" maxlength="300"></div>
+    <details class="tpl" id="tplBox">
+      <summary>Change the wording</summary>
+      <textarea id="tpl" rows="11" aria-describedby="tplHelp"></textarea>
+      <p class="tokens" id="tplHelp">Fill-ins: <code>{first}</code> first name · <code>{old}</code> today's price · <code>{new}</code> new price · <code>{date}</code> start date · <code>{service}</code> · <code>{years}</code> how long they've been a client · <code>{reason}</code> · <code>{below}</code> "still less than new clients pay" (only where true) · <code>{me}</code> · <code>{business}</code>. Text inside <code>[[ ]]</code> disappears when a fill-in in it is empty.</p>
+      <button class="btn ghost small" id="btnTplReset">Back to the original wording</button>
+    </details>
+    <div id="outcome" hidden></div>
+    <div class="lgrid" id="lgrid"></div>
+  </section>
+
+  <section id="proSec" aria-labelledby="hPro">
+    <div class="cols">
+      <div>
+        <h2 id="hPro">Pro: your whole client list</h2>
+        <p><span class="price" id="proPrice">$19</span> once. No subscription.</p>
+        <ul>
+          <li>Every regular client, no limit. Free covers <span id="freeN">8</span>.</li>
+          <li>Paste your whole list from a spreadsheet in one go.</li>
+          <li>Keep it for next year's raise: your list stays, just change your rate.</li>
+        </ul>
+        <div id="proState"></div>
+      </div>
+      <div id="proBuy">
+        <p><a class="btn" id="buyLink" href="#" target="_top">Get Pro for $19</a></p>
+        <p style="margin-top:4px">Secure checkout by Whop, a payment company. Card, Apple Pay or PayPal, with a receipt for your books.</p>
+        <label for="proKey"><b>Already bought? Enter the email you paid with, or a gift code.</b></label>
+        <div class="row" style="margin-top:6px"><input type="email" id="proKey" placeholder="you@example.com or gift code" style="flex:1 1 220px"><button class="btn ghost" id="btnUnlock">Unlock Pro</button></div>
+        <p id="proMsg" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site">
+    <p><b>Your client list stays in this browser.</b> Nothing you type is uploaded; it's saved on this device so it's here next time. Use "Download as CSV" to keep a copy.</p>
+    <p>Rate Raise is made by Sam's Bench · <a href="https://samsbench.com/">samsbench.com</a></p>
+  </footer>
+</main>
+<div id="printArea"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/*CORE-START*/
+var RR = (function(){
+  /* per = visits a year when working all 12 months; months < 12 (lawn, pool seasons) scale it down */
+  var FREQ = {w1:{per:52, label:'Weekly'}, w2:{per:26, label:'Every 2 wks'}, w3:{per:52/3, label:'Every 3 wks'}, w4:{per:13, label:'Every 4 wks'},
+              w6:{per:52/6, label:'Every 6 wks'}, w8:{per:6.5, label:'Every 8 wks'}, m1:{per:12, label:'Monthly'}, q:{per:4, label:'Quarterly'},
+              x:{per:0, label:'Other (visits a year)'}};
+  /* "120", "$1,200.00", "€85,50", "1.200,50" -> number. A single comma followed by 1-2 digits at the end is a decimal comma. */
+  function num(v){
+    var s = String(v == null ? '' : v).replace(/[^0-9.,\-]/g, '');
+    if(/^-?\d+,\d{1,2}$/.test(s)) s = s.replace(',', '.');
+    else if(/^-?\d{1,3}(\.\d{3})+,\d{1,2}$/.test(s)) s = s.replace(/\./g, '').replace(',', '.');
+    else s = s.replace(/,/g, '');
+    var n = parseFloat(s); return isFinite(n) ? n : NaN;
+  }
+  /* "1.5", "2,5", "1:30", "90m", "1h30", "2 hrs", "2 hours 30 min" -> hours */
+  function hours(v){
+    var s = String(v == null ? '' : v).trim().toLowerCase().replace(/(\d),(\d)/, '$1.$2'); if(!s) return NaN;
+    var m = /^(\d+)\s*[:h]\s*(\d{1,2})\s*m?$/.exec(s); if(m) return +m[1] + (+m[2]) / 60;
+    m = /^(\d+(?:\.\d+)?)\s*(?:h|hr|hrs|hours?)\s*(?:and\s*)?(\d{1,2})\s*(?:m|min|mins|minutes?)$/.exec(s); if(m) return +m[1] + (+m[2]) / 60;
+    m = /^(\d+(?:\.\d+)?)\s*(m|min|mins|minutes?)$/.exec(s); if(m) return +m[1] / 60;
+    m = /^(\d+(?:\.\d+)?)\s*(h|hr|hrs|hours?)?$/.exec(s); if(m) return +m[1];
+    return NaN;
+  }
+  function perYear(c, months){
+    var f = FREQ[c.freq] ? c.freq : 'w2';
+    if(f === 'x'){ var p = num(c.perYear); return p > 0 && p <= 366 ? p : 0; }
+    var mo = months > 0 && months <= 12 ? months : 12;
+    return FREQ[f].per * mo / 12;
+  }
+  /* round to a step (1, 5, 10 ...); 'down' never rounds up, 'up' never rounds down */
+  function rnd(x, step, how){
+    step = step > 0 ? step : 1; var q = x / step;
+    q = how === 'down' ? Math.floor(q + 1e-9) : how === 'up' ? Math.ceil(q - 1e-9) : Math.round(q);
+    return Math.round(q * step * 100) / 100;
+  }
+  function isDate(iso){ return /^\d{4}-\d{2}-\d{2}$/.test(String(iso)) && !isNaN(Date.parse(iso + 'T00:00:00Z')); }
+  function addMonths(iso, k){
+    var d = new Date(iso + 'T00:00:00Z'), day = d.getUTCDate();
+    d.setUTCDate(1); d.setUTCMonth(d.getUTCMonth() + k);
+    var last = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
+    d.setUTCDate(Math.min(day, last));
+    return d.toISOString().slice(0, 10);
+  }
+  function daysBetween(a, b){ return Math.round((Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / 864e5); }
+  /* Jan 1 if it is 30..75 days away; otherwise the 1st of the first month at least `notice` days out */
+  function defaultStart(today, notice){
+    var y = +today.slice(0, 4), jan = (y + 1) + '-01-01';
+    if(daysBetween(today, jan) >= notice && daysBetween(today, jan) <= 75) return jan;
+    var d = new Date(Date.parse(today + 'T00:00:00Z') + notice * 864e5);
+    if(d.getUTCDate() !== 1){ d.setUTCDate(1); d.setUTCMonth(d.getUTCMonth() + 1); }
+    return d.toISOString().slice(0, 10);
+  }
+  /* settings: rate (new-client price per hour of work), cap (0.15 = biggest single raise; 0 or Infinity = no limit), round (1|5|10),
+     skip (smallest raise worth asking for), loyal (0.05 = old clients pay 5% under the new-client price), gap (months between steps),
+     start (date of the first raise), months (months a year you work) */
+  function client(c, s){
+    var price = num(c.price), h = hours(c.hours), per = perYear(c, s.months);
+    var r = {id:c.id, valid: price > 0 && h > 0 && per > 0, price:price, hours:h, per:per, steps:[], dates:[],
+             why: !(price > 0) ? 'price' : !(h > 0) ? 'hours' : !(per > 0) ? 'often' : ''};
+    if(!r.valid) return r;
+    var cap = s.cap > 0 && isFinite(s.cap) ? s.cap : Infinity;
+    r.hourly = price / h;
+    r.full = rnd(s.rate * h, s.round, 'down');                                   // a new client's price, never rounded above the rate
+    r.target = s.loyal > 0 ? rnd(s.rate * h * (1 - s.loyal), s.round, 'down') : r.full;
+    if(!(s.rate > 0) || r.target - price < Math.max(s.skip || 0, 0.01)){ r.kind = 'ok'; r.new1 = price; return r; }
+    var cur = price;
+    while(cur < r.target - 1e-9 && r.steps.length < 4){
+      var lim = cur * (1 + cap), nx;
+      if(r.target <= lim + 1e-9) nx = r.target;
+      else {
+        nx = rnd(lim, s.round, 'down');                                            // a round number inside the cap
+        if(nx <= cur) nx = Math.floor(lim + 1e-9);                                 // the cap is smaller than one rounding step: whole units
+        if(nx <= cur) nx = Math.floor(cur) + 1;                                    // tiny prices: one unit up
+        nx = Math.min(nx, r.target);
+      }
+      if(nx <= cur) break;
+      r.steps.push(nx); cur = nx;
+    }
+    r.reach = cur >= r.target - 1e-9;                                            // false: still under target after 4 steps
+    r.dates = r.steps.map(function(_, i){ return addMonths(s.start, i * (s.gap || 6)); });
+    r.new1 = r.steps[0];
+    r.kind = r.steps.length > 1 ? 'steps' : 'raise';
+    r.underNew = r.new1 < r.full - 1e-9;                                         // still pays less than a new client would
+    return r;
+  }
+  function plan(clients, s){
+    var rows = clients.map(function(c){ return client(c, s); });
+    var ok = rows.filter(function(r){ return r.valid; });
+    var R0 = 0, R1 = 0, H = 0;
+    ok.forEach(function(r){ R0 += r.price * r.per; R1 += r.new1 * r.per; H += r.hours * r.per; });
+    var raised = ok.filter(function(r){ return r.new1 > r.price; });
+    /* who could leave without income dropping below today's? Lowest-paying per hour first: they get the biggest raises, are the likeliest to
+       leave, and free the most hours per dollar (LawnSite/Jobber threads: "the ones we were hoping to lose"). One that is too big is skipped. */
+    var cheap = raised.slice().sort(function(a, b){ return a.hourly - b.hourly || a.new1 * a.per - b.new1 * b.per; });
+    var left = R1, n = 0, hb = 0, ids = [];
+    for(var i = 0; i < cheap.length; i++){
+      var y = cheap[i].new1 * cheap[i].per;
+      if(left - y < R0 - 1e-6) continue;
+      left -= y; n++; hb += cheap[i].hours * cheap[i].per; ids.push(cheap[i].id);
+    }
+    var big = null;                                                              // the raised client with the biggest new yearly bill
+    raised.forEach(function(r){ if(!big || r.new1 * r.per > big.new1 * big.per) big = r; });
+    var bigShort = big ? R0 - (R1 - big.new1 * big.per) : 0;                     // > 0: you'd make this much less than today
+    return {rows:rows, valid:ok.length, raised:raised.length, R0:R0, R1:R1, gain:R1 - R0, H:H,
+            hourly0: H > 0 ? R0 / H : 0, hourly1: H > 0 ? R1 / H : 0, canLose:n, loseIds:ids, hoursBack:hb, bigId: big ? big.id : '', bigShort:bigShort};
+  }
+  /* answers: {id: 'ok'|'leaving'|'told'|''}. Raised clients who haven't answered are counted at the new price. */
+  function outcome(p, answers){
+    var o = {ok:0, leaving:0, open:0, R:0, H:0, hoursFreed:0};
+    p.rows.forEach(function(r){
+      if(!r.valid) return;
+      var a = answers[r.id] || '';
+      if(r.new1 > r.price){
+        if(a === 'leaving'){ o.leaving++; o.hoursFreed += r.hours * r.per; return; }
+        if(a === 'ok') o.ok++; else o.open++;
+      }
+      o.R += r.new1 * r.per; o.H += r.hours * r.per;
+    });
+    o.vsNow = o.R - p.R0;
+    o.hourly = o.H > 0 ? o.R / o.H : 0;
+    return o;
+  }
+  /* letters: [[ ... ]] blocks vanish when any {token} inside them is empty; nested blocks are resolved innermost first */
+  function fill(tpl, v){
+    var t = String(tpl), guard = 0, inner = /\[\[((?:(?!\[\[)[\s\S])*?)\]\]/;
+    while(inner.test(t) && guard++ < 200){
+      t = t.replace(inner, function(_, body){
+        var empty = false;
+        body.replace(/\{(\w+)\}/g, function(__, k){ if(v[k] == null || v[k] === '') empty = true; return ''; });
+        return empty ? '' : body;
+      });
+    }
+    t = t.replace(/\{(\w+)\}/g, function(m, k){ return v.hasOwnProperty(k) ? (v[k] == null ? '' : String(v[k])) : m; });
+    return t.replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').replace(/[ \t]{2,}/g, ' ').replace(/ +([.,!?])/g, '$1').trim();
+  }
+  function money(x, sym){
+    if(!isFinite(x)) return '';
+    var neg = x < 0; x = Math.abs(x);
+    var s = Math.abs(x - Math.round(x)) < 0.005 ? Math.round(x).toLocaleString('en-US') : x.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    return (neg ? '-' : '') + (sym || '$') + s;
+  }
+  function years(since, today){
+    var y = parseInt(since, 10), now = +String(today).slice(0, 4);
+    if(!(y >= 1950 && y <= now)) return '';
+    var k = now - y; if(k < 1) return '';
+    return k === 1 ? 'the last year' : 'the last ' + k + ' years';
+  }
+  /* who the letter says hi to: "Ann Miller" -> Ann; "Mr. and Mrs. Johnson" -> as written; "Smith, John" -> John; "The Lee family" -> Lee family;
+     "123 Oak St" -> there. The user can always type their own greeting per client. */
+  function greet(name){
+    var s = String(name || '').trim().replace(/\s+/g, ' ');
+    if(!s || /^\d/.test(s)) return 'there';
+    if(/^[^,]+,\s*[^,]+$/.test(s)) return s.split(',')[1].trim().split(' ')[0];
+    if(/\s(and|&)\s/i.test(s) || /^(mr|mrs|ms|miss|dr|mx)\.?\s/i.test(s)) return s;
+    var t = s.split(' ');
+    if(/^the$/i.test(t[0]) && t.length > 1) return t.slice(1).join(' ');
+    return t[0];
+  }
+  /* how often, from pasted text. Unknown -> null (caller flags it). */
+  function freqOf(s){
+    s = String(s || '').toLowerCase().replace(/[_]+/g, ' ').replace(/\s+/g, ' ').trim();
+    if(!s) return null;
+    if(/^(w|wk|weekly|every week|once a week|1 ?w(ee)?ks?|every 1 weeks?|7|7 days)$/.test(s)) return {freq:'w1'};
+    if(/^(bi-?weekly|fortnightly|every (other|second) week|eow|e2w|14 days|every fortnight)$/.test(s)) return {freq:'w2'};
+    if(/^(monthly|once a month|every month|1 ?mo(nth)?|m)$/.test(s)) return {freq:'m1'};
+    if(/^(quarterly|every 3 months|every quarter|4 times a year)$/.test(s)) return {freq:'q'};
+    var m = /^(?:every )?(\d{1,2}) ?-? ?(?:weekly|weeks?|wks?|w)$/.exec(s) || /^(\d{1,2})$/.exec(s);
+    if(m){ var k = +m[1]; var key = {1:'w1', 2:'w2', 3:'w3', 4:'w4', 6:'w6', 8:'w8'}[k]; if(key) return {freq:key}; if(k >= 1 && k <= 52) return {freq:'x', perYear:Math.round(52 / k * 10) / 10}; }
+    m = /^every (\d{1,2}) months?$/.exec(s); if(m && +m[1] > 0){ return +m[1] === 1 ? {freq:'m1'} : +m[1] === 3 ? {freq:'q'} : {freq:'x', perYear:Math.round(12 / +m[1] * 10) / 10}; }
+    m = /^(\d+(?:\.\d+)?)\s*(?:x|times)?\s*(?:\/|a|per)?\s*(?:y|yr|year)$/.exec(s); if(m) return {freq:'x', perYear:+m[1]};
+    if(/^other/.test(s)) return {freq:'x'};
+    for(var k2 in FREQ) if(FREQ[k2].label.toLowerCase() === s) return {freq:k2};
+    return null;
+  }
+  /* one line -> cells: tab wins, then semicolon, then comma; double quotes group a cell ("Smith, John", "$1,200.00") */
+  function sepOf(line){ return line.indexOf('\t') >= 0 ? '\t' : (line.replace(/"[^"]*"/g, '').indexOf(';') >= 0 && line.replace(/"[^"]*"/g, '').indexOf(',') < 0 ? ';' : ','); }
+  function cells(line, sep){
+    sep = sep || sepOf(line);
+    var out = [], cur = '', q = false;
+    for(var i = 0; i < line.length; i++){
+      var ch = line[i];
+      if(q){ if(ch === '"'){ if(line[i + 1] === '"'){ cur += '"'; i++; } else q = false; } else cur += ch; }
+      else if(ch === '"') q = true;
+      else if(ch === sep){ out.push(cur.trim()); cur = ''; }
+      else cur += ch;
+    }
+    out.push(cur.trim()); return out;
+  }
+  var HEAD = {name:/^(name|client|customer)/, price:/price|rate|charge|amount|fee|\$|£|€/, hours:/hour|hrs|time|duration|length/, often:/often|freq|interval|schedule|every/,
+              since:/since|start|year|joined/, per:/visits? (a|per) ?year|per year/};
+  /* rows: name, price per visit, hours of work, how often, client since (year), visits a year (for "other").
+     A header row (ours from "Download as CSV", or anyone's with recognisable names) sets the column order. */
+  function parsePaste(text){
+    var out = [], bad = [], col = {name:0, price:1, hours:2, often:3, since:4, per:5}, sep = null;
+    String(text || '').split(/\r?\n/).forEach(function(line, i){
+      if(!line.trim()) return;
+      var f = cells(line, sep);                                                   // after a header row its separator holds for every line
+      if(!out.length && !bad.length && !(num(f[1]) > 0) && f.some(function(x){ return HEAD.name.test(x.toLowerCase()); })){
+        var c2 = {};
+        f.forEach(function(x, j){ x = x.toLowerCase();
+          if(HEAD.per.test(x)){ if(c2.per == null) c2.per = j; return; }
+          ['name','price','hours','often','since'].some(function(k){ if(c2[k] == null && HEAD[k].test(x)){ c2[k] = j; return true; } return false; }); });
+        if(c2.name != null && c2.price != null && c2.hours != null){ col = c2; sep = sepOf(line); return; }
+      }
+      var price = num(f[col.price]), h = hours(f[col.hours]);
+      if(!(price > 0) || !(h > 0)){ bad.push(i + 1); return; }
+      var fq = freqOf(col.often != null ? f[col.often] : '') || {freq:'w2', guessed:true};
+      var per = col.per != null ? num(f[col.per]) : NaN;
+      if(fq.freq === 'x' && !fq.perYear && per > 0) fq.perYear = per;
+      var since = col.since != null ? String(f[col.since] || '').trim() : '';
+      out.push({name:String(f[col.name] || '').slice(0, 60), price:String(price), hours:String(Math.round(h * 100) / 100), freq:fq.freq,
+                perYear: fq.perYear ? String(fq.perYear) : '', since:/^\d{4}$/.test(since) ? since : '', guessed:!!fq.guessed, oftenText:String(col.often != null ? f[col.often] || '' : '')});
+    });
+    return {rows:out, bad:bad};
+  }
+  return {FREQ:FREQ, num:num, hours:hours, perYear:perYear, rnd:rnd, isDate:isDate, addMonths:addMonths, daysBetween:daysBetween, defaultStart:defaultStart,
+          client:client, plan:plan, outcome:outcome, fill:fill, money:money, years:years, greet:greet, freqOf:freqOf, cells:cells, parsePaste:parsePaste};
+})();
+if(typeof module !== 'undefined') module.exports = RR;
+/*CORE-END*/
+</script>
+<script>
+(function(){
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+var SITE = 'https://samsbench.com/rate-raise/';
+var APP_KEY = 'rate-raise';
+var VERIFY_URL = 'https://app-bizz-api.whop.site/api/verify';
+var CHECKOUT_HOME = 'https://whop.com/checkout/ch_X8JIByUQpvcCKAT/';     // $19 one-time, returns to SITE?bought=1#proSec
+var CHECKOUT_PLAN = 'https://whop.com/checkout/plan_h6dnz1U9Uk3hb';      // same price; used with ?a=<affiliate>
+var PRICE = '$19';
+var GIFT = [];                                                     // SHA-256 of gift codes handed out in letters
+var KEY = 'rr.v1', PROKEY = 'rr.pro', FREE_N = 8, MAX_N = 400;
+
+/* ---------- measurement (GoatCounter). The ?via code follows the visitor down the funnel (Family Formals / Handbell Chart pattern). ---------- */
+var GC_CODE = 'rateraise';
+var SRC = (function(){ try{
+  var q = new URLSearchParams(location.search), v = (q.get('via') || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 20) || (q.get('a') ? 'aff' : '');
+  if(v){ sessionStorage.setItem('rr.src', v); return v; }
+  return sessionStorage.getItem('rr.src') || '';
+}catch(e){ return ''; } })();
+var FUNNEL_EV = {'tool-start':1, 'plan-made':1, 'letter-used':1, 'status-set':1, 'paste-used':1, 'pro-view':1, 'pro-limit':1, 'buy-click':1, 'pro-unlocked':1, 'pro-gift':1};
+var ONCE = {}, QUEUE = [], SENDING = false, GC_READY = 0;
+/* One hit every 700 ms; the first waits 1.5 s after count.js loads. GoatCounter's /count takes about 4 requests/second per IP+UA
+   and silently drops the rest (bizz-handbell 11-24 live test). */
+function track(name){
+  try{
+    if(SRC && FUNNEL_EV[name]) QUEUE.push(name + '.' + SRC);
+    QUEUE.push(name); drain();
+  }catch(e){}
+}
+function drain(){
+  if(SENDING || !QUEUE.length) return;
+  if(!(window.goatcounter && window.goatcounter.count)){ SENDING = true; setTimeout(function(){ SENDING = false; drain(); }, 400); return; }
+  if(!GC_READY){ GC_READY = Date.now(); }
+  if(Date.now() - GC_READY < 1500){ SENDING = true; setTimeout(function(){ SENDING = false; drain(); }, 1500 - (Date.now() - GC_READY)); return; }
+  var n = QUEUE.shift(); SENDING = true;
+  try{ window.goatcounter.count({path: n, title: n, event: true}); }catch(e){}
+  setTimeout(function(){ SENDING = false; drain(); }, 700);
+}
+function trackOnce(name){ if(ONCE[name]) return; ONCE[name] = 1; track(name); }
+
+/* ---------- state ---------- */
+function lsGet(k, d){ try{ var t = localStorage.getItem(k); return t ? JSON.parse(t) : d; }catch(e){ return d; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+var seq = 1;
+function uid(){ return 'c' + Date.now().toString(36) + (seq++).toString(36); }
+function isoToday(){ var d = new Date(); return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())).toISOString().slice(0, 10); }
+var TODAY = isoToday();
+var DEF = {
+  i:  {letter:'Hi {first},\n\nThank you for having me look after your home[[ for {years}]]. I\'m writing to let you know that from {date}, your regular {service} will be {new} per visit (it\'s {old} now).[[ {next}]]\n\n{reason}\n\n[[{below}]]\n\nIf you have any questions, just reply or give me a call.\n\nThank you,\n{me}[[\n{business}]]',
+       text:'Hi {first}[[, it\'s {me}]]. From {date} your {service} will be {new} per visit (now {old}).[[ {next_short}]] {reason_short} Thank you!'},
+  we: {letter:'Hi {first},\n\nThank you for having us look after your home[[ for {years}]]. We\'re writing to let you know that from {date}, your regular {service} will be {new} per visit (it\'s {old} now).[[ {next}]]\n\n{reason}\n\n[[{below}]]\n\nIf you have any questions, just reply or give us a call.\n\nThank you,\n{me}[[\n{business}]]',
+       text:'Hi {first}[[, it\'s {me}[[ from {business}]]]]. From {date} your {service} will be {new} per visit (now {old}).[[ {next_short}]] {reason_short} Thank you!'}
+};
+var REASONS = {
+  i:  {costs:['My costs for insurance, fuel and supplies have gone up, and this lets me keep doing the work the way you\'re used to.', 'My costs have gone up.'],
+       team: ['It lets me keep paying my helpers fairly, so the same people keep coming to your home.', 'It helps me pay my helpers fairly.'],
+       time: ['My prices haven\'t changed in a while, and this brings yours closer to what I charge today.', 'My prices haven\'t changed in a while.'],
+       none: ['', '']},
+  we: {costs:['Our costs for insurance, fuel and supplies have gone up, and this lets us keep doing the work the way you\'re used to.', 'Our costs have gone up.'],
+       team: ['It lets us keep paying our team fairly, so the same people keep coming to your home.', 'It helps us pay our team fairly.'],
+       time: ['Our prices haven\'t changed in a while, and this brings yours closer to what we charge today.', 'Our prices haven\'t changed in a while.'],
+       none: ['', '']}
+};
+function voice(){ return S.set.voice === 'we' ? 'we' : 'i'; }
+function defaults(){
+  return {rate:'', cap:'15', gap:'6', round:'5', skip:'3', loyal:'0', start:RR.defaultStart(TODAY, 30), cur:'$', service:'cleaning', me:'', biz:'',
+          fmt:'letter', reason:'costs', reasonTxt:'', tplLetter:'', tplText:'', months:'12', voice:'i'};
+}
+function example(){
+  var s = defaults(); s.rate = '60';
+  var c = [['Ann Miller', 110, 2.5, 'w2', '2019'], ['Raj Okafor', 140, 2.5, 'w2', '2022'], ['The Lee family', 160, 3, 'w1', '2023'],
+           ['Maria Garcia', 90, 2, 'm1', '2016'], ['Tom Brooks', 120, 2, 'w2', '2024'], ['Priya Patel', 185, 3, 'w4', '2025']];
+  return {v:1, set:s, clients:c.map(function(x){ return {id:uid(), name:x[0], price:String(x[1]), hours:String(x[2]), freq:x[3], perYear:'', since:x[4], ex:true}; }), ans:{}};
+}
+function valid(st){
+  if(!st || st.v !== 1 || typeof st.set !== 'object' || !st.set || !Array.isArray(st.clients)) return false;
+  var d = defaults(); Object.keys(d).forEach(function(k){ if(typeof st.set[k] !== 'string') st.set[k] = d[k]; st.set[k] = st.set[k].slice(0, 4000); });
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(st.set.start)) st.set.start = d.start;
+  if(['$','£','€'].indexOf(st.set.cur) < 0) st.set.cur = '$';
+  if(st.set.fmt !== 'text') st.set.fmt = 'letter';
+  if(!REASONS.i.hasOwnProperty(st.set.reason) && st.set.reason !== 'custom') st.set.reason = 'costs';
+  st.clients = st.clients.filter(function(c){ return c && typeof c.id === 'string' && /^[A-Za-z0-9]{1,24}$/.test(c.id); }).slice(0, MAX_N);
+  st.clients.forEach(function(c){
+    ['name','price','hours','perYear','since','greet','oftenText'].forEach(function(k){ c[k] = String(c[k] == null ? '' : c[k]).slice(0, 80); });
+    if(!RR.FREQ[c.freq]) c.freq = 'w2'; c.ex = !!c.ex; c.check = !!c.check;
+  });
+  if(!st.ans || typeof st.ans !== 'object') st.ans = {};
+  return true;
+}
+var S = lsGet(KEY, null); if(!valid(S)){ S = example(); valid(S); }
+var PRO = lsGet(PROKEY, {});
+function isPro(){ return !!(PRO && (PRO.email || PRO.gift)); }
+function save(){ lsSet(KEY, S); }
+function hasExample(){ return S.clients.some(function(c){ return c.ex; }); }
+function allExample(){ return S.clients.length > 0 && S.clients.every(function(c){ return c.ex; }); }
+function blank(c){ return !c.name.trim() && !c.price.trim() && !c.hours.trim(); }
+function settings(){
+  var s = S.set;
+  return {rate:RR.num(s.rate), cap:s.cap === '0' ? 0 : (+s.cap || 15) / 100, gap:+s.gap || 6, round:+s.round || 5, skip:Math.max(0, RR.num(s.skip) || 0),
+          loyal:(+s.loyal || 0) / 100, start:RR.isDate(s.start) ? s.start : RR.defaultStart(TODAY, 30), months:+s.months || 12};
+}
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function M(x){ return RR.money(x, S.set.cur); }
+var LOCALE = (function(){ try{ return navigator.language || 'en-US'; }catch(e){ return 'en-US'; } })();
+function dayFirst(){ return /^en-(GB|AU|NZ|IE|ZA|IN)/i.test(LOCALE) || S.set.cur !== '$'; }
+function longDate(iso){
+  var d = new Date(iso + 'T12:00:00Z'), mo = ['January','February','March','April','May','June','July','August','September','October','November','December'][d.getUTCMonth()];
+  return dayFirst() ? d.getUTCDate() + ' ' + mo + ' ' + d.getUTCFullYear() : mo + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear();
+}
+function shortDate(iso){ var d = new Date(iso + 'T12:00:00Z'), mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()]; return dayFirst() ? d.getUTCDate() + ' ' + mo + ' ' + d.getUTCFullYear() : mo + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear(); }
+var toastT = 0;
+function say(t){ var el = $('toast'); el.textContent = t; el.className = 'on'; clearTimeout(toastT); toastT = setTimeout(function(){ el.className = ''; }, 3200); }
+
+/* ---------- step 1: rate and rules ---------- */
+var SET_IDS = ['rate','cap','gap','round','skip','loyal','start','cur','service','me','biz','months','voice'];
+function renderSettings(){
+  SET_IDS.forEach(function(k){ var el = $(k); if(el && el.value !== S.set[k]) el.value = S.set[k]; });
+  $('curSym').textContent = S.set.cur;
+  $('reason').value = S.set.reason; $('reasonTxt').value = S.set.reasonTxt; $('reasonBox').hidden = S.set.reason !== 'custom';
+  Array.prototype.forEach.call(document.querySelectorAll('[data-fmt]'), function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-fmt') === S.set.fmt)); });
+  $('tpl').value = tplNow();
+}
+function tplNow(){ return S.set.fmt === 'text' ? (S.set.tplText || DEF[voice()].text) : (S.set.tplLetter || DEF[voice()].letter); }
+
+/* ---------- step 2: clients ---------- */
+function freqOptions(sel){
+  return Object.keys(RR.FREQ).map(function(k){ return '<option value="' + k + '"' + (k === sel ? ' selected' : '') + '>' + RR.FREQ[k].label + '</option>'; }).join('');
+}
+function renderClients(){
+  $('exNote').hidden = !hasExample();
+  $('clients').innerHTML = S.clients.map(function(c, i){
+    var n = i + 1;
+    return '<div class="cl' + (c.ex ? ' ex' : '') + '" data-id="' + c.id + '">'
+      + '<div class="f">'
+      + '<div class="nm"><div><label for="n_' + c.id + '">Client ' + n + '</label><input id="n_' + c.id + '" data-k="name" type="text" value="' + esc(c.name) + '" placeholder="Name" autocomplete="off"></div>'
+      +   '<button class="x" data-del="' + c.id + '" aria-label="Remove client ' + n + '">×</button></div>'
+      + '<div><label for="p_' + c.id + '">' + esc(S.set.cur) + ' per visit</label><input id="p_' + c.id + '" data-k="price" type="text" inputmode="decimal" value="' + esc(c.price) + '" placeholder="120"></div>'
+      + '<div><label for="h_' + c.id + '">Hours of work</label><input id="h_' + c.id + '" data-k="hours" type="text" inputmode="decimal" value="' + esc(c.hours) + '" placeholder="2.5"></div>'
+      + '<div><label for="f_' + c.id + '">How often</label><select id="f_' + c.id + '" data-k="freq">' + freqOptions(c.freq) + '</select>'
+      +   (c.freq === 'x' ? '<input data-k="perYear" type="text" inputmode="decimal" value="' + esc(c.perYear) + '" placeholder="visits a year" aria-label="Visits a year for client ' + n + '" style="margin-top:4px">' : '') + '</div>'
+      + '<div><label for="s_' + c.id + '">Since</label><input id="s_' + c.id + '" data-k="since" type="text" inputmode="numeric" maxlength="4" value="' + esc(c.since) + '" placeholder="year"></div>'
+      + '<div class="xcell"><button class="x" data-del="' + c.id + '" aria-label="Remove client ' + n + '">×</button></div>'
+      + '</div><div class="res" id="r_' + c.id + '"></div></div>';
+  }).join('') || '<p class="empty">No clients yet. Add your first one below.</p>';
+}
+var P = null;
+function compute(){ P = RR.plan(S.clients, settings()); }
+function clientById(id){ for(var i = 0; i < S.clients.length; i++) if(S.clients[i].id === id) return S.clients[i]; return null; }
+function rowById(id){ for(var i = 0; i < P.rows.length; i++) if(P.rows[i].id === id) return P.rows[i]; return null; }
+function renderResults(){
+  var st = settings();
+  S.clients.forEach(function(c){
+    var el = $('r_' + c.id); if(!el) return; var r = rowById(c.id);
+    if(!r || !r.valid){ el.innerHTML = '<span class="empty">' + ({price:'Add the price per visit.', hours:'Add the hours of work per visit (all workers together).', often:'Add how many visits a year.'}[r && r.why] || 'Add the price per visit and hours of work.') + '</span>'; return; }
+    var chk = c.check ? '<span class="chk">Check how often' + (c.oftenText ? ' (you pasted "' + esc(c.oftenText) + '")' : '') + '</span>' : '';
+    var hr = chk + '<span class="hr ' + (st.rate > 0 && r.hourly < st.rate - 0.5 ? 'low' : 'fine') + '">' + M(r.hourly) + '/hr now</span>';
+    if(!(st.rate > 0)){ el.innerHTML = hr + '<span class="empty">Put your rate in step 1.</span>'; return; }
+    if(r.kind === 'ok'){ el.innerHTML = hr + '<span class="tag same">' + M(r.price) + ' stays</span><span class="steps">already at your rate</span>'; return; }
+    var pct = Math.round((r.new1 / r.price - 1) * 100);
+    var more = r.steps.length > 1 ? 'then ' + r.steps.slice(1).map(function(x, i){ return M(x) + ' (' + shortDate(r.dates[i + 1]) + ')'; }).join(', ') + (r.reach ? '' : ', still under your rate') : '';
+    el.innerHTML = hr + '<span class="old">' + M(r.price) + '</span><span class="tag">' + M(r.new1) + '</span><span>+' + pct + '% from ' + shortDate(r.dates[0]) + '</span>' + (more ? '<span class="steps">' + more + '</span>' : '');
+  });
+  renderSummary(); renderLetters();
+  if(ONCE['tool-start'] && st.rate > 0){
+    var mine = P.rows.filter(function(r){ var c = clientById(r.id); return r.valid && c && !c.ex; });
+    if(mine.length >= 2 && mine.some(function(r){ return r.new1 > r.price; })) trackOnce('plan-made');
+  }
+}
+function renderSummary(){
+  var st = settings(), el = $('sumCard');
+  if(!(st.rate > 0)){ el.innerHTML = '<h2 id="hSum">What the raise is worth</h2><p class="empty">Put in your rate (step 1) and at least one client (step 2).</p>'; return; }
+  if(!P.valid){ el.innerHTML = '<h2 id="hSum">What the raise is worth</h2><p class="empty">Add a client with a price per visit and hours of work.</p>'; return; }
+  var days = RR.daysBetween(TODAY, st.start), okN = P.valid - P.raised;
+  var h = '<h2 id="hSum">What the raise is worth' + (allExample() ? ' (example)' : '') + '</h2>'
+    + '<div class="big' + (P.gain < 0 ? ' neg' : '') + '" style="margin-top:10px">' + (P.gain >= 0 ? '+' : '') + M(Math.round(P.gain)) + '</div>'
+    + '<div>a year if every client stays, this first round only.</div>'
+    + '<div class="kv"><span>Yearly from regular clients now</span><b>' + M(Math.round(P.R0)) + '</b>'
+    + '<span>After this round</span><b>' + M(Math.round(P.R1)) + '</b>'
+    + '<span>Per hour of work, on average</span><b>' + M(Math.round(P.hourly0)) + ' → ' + M(Math.round(P.hourly1)) + '</b>'
+    + '<span>Clients getting a raise</span><b>' + P.raised + ' of ' + P.valid + '</b></div>';
+  if(P.raised){
+    var hb = Math.round(P.hoursBack), names = P.loseIds.map(function(id){ var c = clientById(id); return esc((c && c.name.trim()) || 'unnamed'); });
+    if(P.canLose > 0){
+      h += '<div class="risk"><b>' + (P.canLose === 1 ? names[0] + ', one of your lowest-paying clients, could leave' : P.canLose + ' of your lowest-paying clients could all leave') + ' and you\'d still earn what you do today</b>'
+        + (P.canLose > 1 ? ' (' + names.slice(0, 6).join(', ') + (names.length > 6 ? '…' : '') + ')' : '') + ', with about ' + hb + ' fewer hours of work a year'
+        + (st.rate > 0 ? '. Fill those hours at your new-client rate and that\'s up to ' + M(Math.round(hb * st.rate)) + ' more.' : '.') + '</div>';
+    } else {
+      h += '<div class="risk bad"><b>No room to lose anyone.</b> Even your lowest-paying raised client leaving would leave you below today\'s income, unless you fill the slot.</div>';
+    }
+    if(P.bigShort > 0 && P.bigId){ var bc = clientById(P.bigId); h += '<p style="margin-top:10px">Your biggest raised client is <b>' + esc((bc && bc.name.trim()) || 'unnamed') + '</b>. If they left, you\'d be ' + M(Math.round(P.bigShort)) + ' a year below today. Worth a phone call instead of a letter.</p>'; }
+  }
+  if(okN > 0) h += '<p style="margin-top:10px">' + okN + ' client' + (okN === 1 ? ' is' : 's are') + ' already at your rate, no letter needed.</p>';
+  h += '<p class="help" style="margin-top:8px">New prices start <b>' + longDate(st.start) + '</b>' + (days >= 0 ? ', ' + days + ' days from today.' : '.') + '</p>';
+  if(days < 30) h += '<p class="warn">That\'s less than 30 days\' notice. Most pros give at least 30. Change "New prices start" in step 1.</p>';
+  el.innerHTML = h;
+}
+
+/* ---------- step 3: letters ---------- */
+function reasonText(i){ return S.set.reason === 'custom' ? S.set.reasonTxt.trim() : (REASONS[voice()][S.set.reason] || ['', ''])[i || 0]; }
+function letterFor(c, r){
+  var later = r.steps.slice(1).map(function(x, i){ return M(x) + ' from ' + longDate(r.dates[i + 1]); });
+  var who = voice() === 'we' ? 'we\'ll' : 'I\'ll';
+  return RR.fill(tplNow(), {
+    first: c.greet.trim() || RR.greet(c.name), name: c.name.trim(), old: M(r.price), 'new': M(r.new1), date: longDate(r.dates[0]), service: S.set.service.trim() || 'service',
+    years: RR.years(c.since, TODAY), reason: reasonText(0), reason_short: S.set.reason === 'custom' ? reasonText(0) : reasonText(1),
+    below: r.kind === 'raise' && r.underNew ? 'That\'s still less than new clients pay, as a thank-you for staying with ' + (voice() === 'we' ? 'us' : 'me') + '.' : '',
+    next: later.length ? 'To keep each change small, ' + who + ' bring it up the rest of the way in steps: ' + later.join(', then ') + '.' : '',
+    next_short: later.length ? 'Then ' + later.join(', then ') + '.' : '',
+    me: S.set.me.trim(), business: S.set.biz.trim()
+  });
+}
+function raisedList(){
+  var out = [];
+  S.clients.forEach(function(c){ var r = rowById(c.id); if(r && r.valid && r.new1 > r.price) out.push({c:c, r:r}); });
+  return out;
+}
+var ANS = [['', 'Not told'], ['told', 'Told'], ['ok', 'Said OK'], ['leaving', 'Leaving']];
+function renderLetters(){
+  var st = settings(), L = st.rate > 0 ? raisedList() : [], g = $('lgrid');
+  if(!L.length){ g.innerHTML = '<p class="empty">' + (st.rate > 0 ? 'Nobody needs a raise yet. Clients below your rate show up here with their own letter.' : 'Put in your rate and clients first.') + '</p>'; $('outcome').hidden = true; return; }
+  var warn = !S.set.me.trim() ? '<p class="warn" style="grid-column:1/-1">Add your name under "Rules for the raise" in step 1 so the letters are signed.</p>' : '';
+  g.innerHTML = warn + L.map(function(x){
+    var a = S.ans[x.c.id] || '';
+    return '<article class="letter" data-id="' + x.c.id + '"><header><h3>' + esc(x.c.name.trim() || 'Unnamed client') + '</h3><span class="old">' + M(x.r.price) + '</span><span class="tag">' + M(x.r.new1) + '</span></header>'
+      + '<label class="greet">Hi <input data-greet="' + x.c.id + '" type="text" value="' + esc(x.c.greet || RR.greet(x.c.name)) + '" aria-label="Greeting for ' + esc(x.c.name.trim() || 'this client') + '" maxlength="60"></label>'
+      + '<pre id="lt_' + x.c.id + '">' + esc(letterFor(x.c, x.r)) + '</pre>'
+      + '<footer><button class="btn small" data-copy="' + x.c.id + '">Copy</button><span style="flex:1"></span>'
+      + ANS.map(function(o){ return '<button class="chip' + (o[0] === 'ok' ? ' okc' : o[0] === 'leaving' ? ' lv' : '') + '" data-ans="' + o[0] + '" data-for="' + x.c.id + '" aria-pressed="' + (a === o[0]) + '">' + o[1] + '</button>'; }).join('')
+      + '</footer></article>';
+  }).join('');
+  renderOutcome();
+}
+function renderOutcome(){
+  var any = Object.keys(S.ans).some(function(k){ return S.ans[k] && rowById(k); });
+  var el = $('outcome'); if(!any || !P.raised){ el.hidden = true; return; }
+  var o = RR.outcome(P, S.ans);
+  el.hidden = false;
+  el.innerHTML = '<b>So far: ' + o.ok + ' said OK, ' + o.leaving + ' leaving, ' + o.open + ' not answered.</b> '
+    + 'If the rest say yes, your regular clients bring in ' + M(Math.round(o.R)) + ' a year: '
+    + (o.vsNow < 0 ? '<span class="warn">' + M(Math.round(o.vsNow)) + ' compared with today</span>' : '+' + M(Math.round(o.vsNow)) + ' compared with today')
+    + (o.leaving ? ', and you get back about ' + Math.round(o.hoursFreed) + ' hours a year (' + M(Math.round(P.hourly0)) + ' → ' + M(Math.round(o.hourly)) + ' per hour of work)' : '') + '.'
+    + (o.vsNow < 0 && o.leaving && settings().rate > 0 ? ' Fill ' + (o.hoursFreed > 40 ? 'some of ' : '') + 'those hours at your new-client rate to get back ahead.' : '')
+    + '<div class="row" style="margin-top:10px"><button class="btn small" id="btnApply">This round is done: make the new prices current</button></div>';
+}
+
+function applyRound(){
+  var leaving = S.clients.filter(function(c){ return S.ans[c.id] === 'leaving'; });
+  var n = 0;
+  S.clients.forEach(function(c){ var r = rowById(c.id); if(r && r.valid && r.new1 > r.price && S.ans[c.id] !== 'leaving'){ c.price = String(r.new1); n++; } });
+  if(leaving.length && window.confirm('Remove the ' + leaving.length + ' client' + (leaving.length === 1 ? '' : 's') + ' marked Leaving from your list?')){
+    var gone = {}; leaving.forEach(function(c){ gone[c.id] = 1; }); S.clients = S.clients.filter(function(c){ return !gone[c.id]; });
+  }
+  S.ans = {}; S.set.start = RR.addMonths(settings().start, settings().gap);
+  save(); track('round-applied'); renderAll();
+  say(n + ' new price' + (n === 1 ? ' is' : 's are') + ' now current. Next round starts ' + longDate(S.set.start) + '.');
+}
+
+/* ---------- copy / print / csv ---------- */
+function copyText(t){
+  if(navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(t).then(function(){ return true; }, function(){ return fallbackCopy(t); });
+  return Promise.resolve(fallbackCopy(t));
+}
+function fallbackCopy(t){
+  var ta = document.createElement('textarea'); ta.value = t; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.top = '-1000px';
+  document.body.appendChild(ta); ta.select(); var ok = false; try{ ok = document.execCommand('copy'); }catch(e){} document.body.removeChild(ta); return ok;
+}
+function used(kind){ trackOnce('letter-used'); track(kind); }
+function copyOne(id){
+  var c = null; S.clients.forEach(function(x){ if(x.id === id) c = x; }); var r = rowById(id); if(!c || !r) return;
+  copyText(letterFor(c, r)).then(function(ok){ say(ok ? 'Copied. Paste it into your email or text app.' : 'Couldn\'t copy. Select the text and copy it by hand.'); });
+  used('letter-copy');
+  if(!S.ans[id]){ S.ans[id] = 'told'; save(); renderLetters(); }
+}
+function copyAll(){
+  var L = raisedList(); if(!L.length){ say('No letters yet.'); return; }
+  var t = L.map(function(x){ return '=== ' + (x.c.name.trim() || 'Unnamed client') + ' ===\n' + letterFor(x.c, x.r); }).join('\n\n');
+  copyText(t).then(function(ok){ say(ok ? 'Copied ' + L.length + ' letters.' : 'Couldn\'t copy. Try "Print all letters" instead.'); });
+  used('letters-copy-all');
+}
+function printAll(){
+  var L = raisedList(); if(!L.length){ say('No letters yet.'); return; }
+  $('printArea').innerHTML = L.map(function(x){ return '<div class="pl">' + esc(letterFor(x.c, x.r)) + '</div>'; }).join('');
+  used('letters-print');
+  setTimeout(function(){ window.print(); }, 50);
+}
+function csvCell(v){ v = String(v == null ? '' : v); return /[",;\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+function downloadCsv(){
+  var rows = [['name','price per visit','hours of work','how often','client since','visits a year','per hour now','new price','raise %','starts','later steps','answer']];
+  S.clients.forEach(function(c){
+    var r = rowById(c.id) || {};
+    rows.push([c.name, c.price, c.hours, RR.FREQ[c.freq].label, c.since, c.freq === 'x' ? c.perYear : (r.per ? Math.round(r.per * 10) / 10 : ''), r.valid ? Math.round(r.hourly * 100) / 100 : '',
+      r.valid ? r.new1 : '', r.valid && r.new1 > r.price ? Math.round((r.new1 / r.price - 1) * 1000) / 10 : '', r.valid && r.dates && r.dates[0] && r.new1 > r.price ? r.dates[0] : '',
+      r.valid && r.steps && r.steps.length > 1 ? r.steps.slice(1).map(function(x, i){ return x + ' on ' + r.dates[i + 1]; }).join('; ') : '', S.ans[c.id] || '']);
+  });
+  var blob = new Blob([rows.map(function(r){ return r.map(csvCell).join(','); }).join('\r\n')], {type:'text/csv'});
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'rate-raise-' + TODAY + '.csv'; document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  track('csv');
+}
+
+/* ---------- Pro ---------- */
+function buyUrl(){
+  var a = ''; try{ a = (new URLSearchParams(location.search).get('a') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40); }catch(e){}
+  return a ? CHECKOUT_PLAN + '?a=' + encodeURIComponent(a) : CHECKOUT_HOME;
+}
+function renderPro(){
+  $('buyLink').href = buyUrl(); $('buyLink').textContent = 'Get Pro for ' + PRICE;
+  $('proPrice').textContent = PRICE; $('freeN').textContent = FREE_N;
+  if(isPro()){
+    $('proBuy').hidden = true;
+    $('proState').innerHTML = '<p class="ok">Pro is on for this browser' + (PRO.email ? ' (' + esc(PRO.email) + ')' : '') + '. Thank you.</p><p>On another device, enter the same email or code there.</p>';
+  } else {
+    $('proBuy').hidden = false;
+    $('proState').innerHTML = /[?&]bought=1/.test(location.search) ? '<p class="ok">Thanks for buying! Enter the email you paid with to unlock.</p>' : '';
+  }
+}
+function proGate(why){
+  track('pro-limit');
+  say(why + ' is part of Pro (' + PRICE + ' once).');
+  $('proSec').scrollIntoView({behavior:'smooth'});
+}
+function sha256hex(s){
+  return crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)).then(function(buf){
+    return Array.prototype.map.call(new Uint8Array(buf), function(b){ return ('0' + b.toString(16)).slice(-2); }).join('');
+  });
+}
+var unlocking = false;
+function unlock(){
+  var v = $('proKey').value.trim(), msg = $('proMsg');
+  if(unlocking) return;
+  if(!v){ msg.innerHTML = '<span class="err">Type the email you paid with, or your gift code.</span>'; return; }
+  if(v.indexOf('@') < 0){
+    if(!window.crypto || !crypto.subtle){ msg.innerHTML = '<span class="err">This browser can\'t check codes. Try another browser.</span>'; return; }
+    sha256hex(v.toUpperCase().replace(/\s+/g, '')).then(function(hx){
+      if(GIFT.indexOf(hx) >= 0){ PRO = {gift: hx.slice(0, 12)}; lsSet(PROKEY, PRO); track('pro-gift'); track('gift-' + hx.slice(0, 8)); msg.textContent = ''; renderAll(); say('Pro unlocked. Enjoy!'); }
+      else msg.innerHTML = '<span class="err">That code didn\'t match. Check the email it came in, or use the email you paid with.</span>';
+    });
+    return;
+  }
+  unlocking = true; msg.textContent = 'Checking…';
+  fetch(VERIFY_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({app:APP_KEY, email:v})})
+    .then(function(r){ if(!r.ok) throw new Error('http ' + r.status); return r.json(); })
+    .then(function(j){
+      unlocking = false;
+      if(j && j.ok && j.valid){ PRO = {email:v.toLowerCase()}; lsSet(PROKEY, PRO); track('pro-unlocked'); msg.textContent = ''; renderAll(); say('Pro unlocked. Thank you!'); }
+      else if(j && j.ok){ track('pro-notfound'); msg.innerHTML = '<span class="err">No purchase found for that email. Use the email you typed at checkout. Just paid? Wait a minute and try again.</span>'; }
+      else throw new Error('bad reply');
+    }).catch(function(){ unlocking = false; msg.innerHTML = '<span class="err">Couldn\'t reach the checker. Check your connection and try again.</span>'; });
+}
+
+/* The checkout is on another site, so the queue would be cut off by the page change (r1 code #12): send buy-click first, then go. */
+function buyClick(e, a){
+  if(e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1){ track('buy-click'); return; }
+  e.preventDefault();
+  var url = a.href, gone = false;
+  function go(){ if(!gone){ gone = true; location.href = url; } }
+  QUEUE = QUEUE.filter(function(n){ return n.indexOf('buy-click') !== 0; });
+  if(SRC) QUEUE.unshift('buy-click.' + SRC); QUEUE.splice(SRC ? 1 : 0, 0, 'buy-click');
+  var t0 = Date.now();
+  (function wait(){ if(Date.now() - t0 > 3500 || (QUEUE.indexOf('buy-click') < 0 && QUEUE.indexOf('buy-click.' + SRC) < 0 && !SENDING)) go(); else setTimeout(wait, 100); })();
+  drain();
+}
+
+/* ---------- events ---------- */
+function started(){ trackOnce('tool-start'); }
+function renderAll(){ renderSettings(); renderClients(); compute(); renderResults(); renderPro(); }
+function dropExamples(){
+  var gone = {}; S.clients.forEach(function(c){ if(c.ex) gone[c.id] = 1; });
+  S.clients = S.clients.filter(function(c){ return !c.ex; }); Object.keys(gone).forEach(function(id){ delete S.ans[id]; });
+  if(S.set.rate === '60') S.set.rate = '';
+}
+function addClient(){
+  if(allExample()){ dropExamples(); track('example-clear'); renderAll(); }               // "+ Add" on the example = starting your own list (r1 code #2)
+  if(!isPro() && S.clients.length >= FREE_N){ proGate('More than ' + FREE_N + ' clients'); return; }
+  var c = {id:uid(), name:'', price:'', hours:'', freq:'w2', perYear:'', since:'', greet:'', oftenText:'', ex:false, check:false};
+  S.clients.push(c); save(); renderClients(); compute(); renderResults(); started();
+  var el = $('n_' + c.id); if(el) el.focus();
+}
+function pasteGo(){
+  var res = RR.parsePaste($('pasteTxt').value), rows = res.rows, msg = $('pasteMsg');
+  if(!rows.length){ msg.innerHTML = '<span class="warn">Couldn\'t read any clients. Each line needs a name, a price and hours.</span>'; return; }
+  if(hasExample()) dropExamples();
+  S.clients = S.clients.filter(function(c){ return !blank(c); });                         // the empty starter row doesn't take a free slot
+  var room = isPro() ? MAX_N - S.clients.length : Math.max(0, FREE_N - S.clients.length);
+  var take = rows.slice(0, room), guessed = take.filter(function(r){ return r.guessed; }).length;
+  take.forEach(function(r){ S.clients.push({id:uid(), name:r.name, price:r.price, hours:r.hours, freq:r.freq, perYear:r.perYear, since:r.since, greet:'', oftenText:r.oftenText, ex:false, check:r.guessed || (r.freq === 'x' && !r.perYear)}); });
+  save(); renderAll(); started(); track('paste-used');
+  var t = 'Added ' + take.length + ' client' + (take.length === 1 ? '' : 's') + '.';
+  if(guessed) t += ' ' + guessed + ' had a "how often" this didn\'t recognise; they\'re set to every 2 weeks and marked "Check how often" in red.';
+  if(res.bad.length) t += ' Skipped line' + (res.bad.length > 1 ? 's ' : ' ') + res.bad.slice(0, 8).join(', ') + ' (no price or hours).';
+  msg.textContent = t;
+  if(take.length < rows.length){ proGate('The other ' + (rows.length - take.length) + ' clients'); }
+  else { $('pasteTxt').value = ''; }
+}
+document.addEventListener('input', function(e){
+  var t = e.target;
+  if(SET_IDS.indexOf(t.id) >= 0){
+    S.set[t.id] = t.value; save(); started();
+    if(t.id === 'cur'){ renderClients(); $('curSym').textContent = S.set.cur; }
+    if(t.id === 'voice') $('tpl').value = tplNow();
+    compute(); renderResults(); return;
+  }
+  if(t.id === 'reasonTxt'){ S.set.reasonTxt = t.value; save(); renderLetters(); return; }
+  if(t.hasAttribute && t.hasAttribute('data-greet')){
+    var gc = clientById(t.getAttribute('data-greet')), gr = gc && rowById(gc.id);
+    if(gc){ gc.greet = t.value === RR.greet(gc.name) ? '' : t.value; save(); var pre = $('lt_' + gc.id); if(pre && gr) pre.textContent = letterFor(gc, gr); trackOnce('greet-edit'); }
+    return;
+  }
+  if(t.id === 'tpl'){ if(S.set.fmt === 'text') S.set.tplText = t.value; else S.set.tplLetter = t.value; save(); renderLetters(); trackOnce('tpl-edit'); return; }
+  var k = t.getAttribute('data-k'), card = t.closest && t.closest('.cl');
+  if(k && card){
+    var id = card.getAttribute('data-id');
+    var wasEx = false;
+    S.clients.forEach(function(c){ if(c.id === id){ c[k] = t.value; wasEx = c.ex; c.ex = false; if(k === 'freq' || k === 'perYear') c.check = false; } });
+    save(); started();
+    if(wasEx){ var cardEl = $('n_' + id) && $('n_' + id).closest('.cl'); if(cardEl) cardEl.classList.remove('ex'); $('exNote').hidden = !hasExample(); }
+    if(k === 'freq'){ renderClients(); var f = $('f_' + id); if(f) f.focus(); }
+    compute(); renderResults();
+  }
+});
+document.addEventListener('click', function(e){
+  var t = e.target.closest ? e.target.closest('button,a') : null; if(!t) return;
+  if(t.id === 'btnAdd'){ addClient(); return; }
+  if(t.id === 'btnMine'){ dropExamples(); save(); track('example-clear'); started(); renderAll(); if(!S.clients.length) addClient(); $('rate').focus(); return; }
+  if(t.id === 'btnApply'){ applyRound(); return; }
+  if(t.id === 'btnPaste'){ var b = $('pasteBox'); b.hidden = !b.hidden; t.setAttribute('aria-expanded', String(!b.hidden)); if(!b.hidden) $('pasteTxt').focus(); return; }
+  if(t.id === 'btnPasteGo'){ pasteGo(); return; }
+  if(t.id === 'btnCsv'){ downloadCsv(); return; }
+  if(t.id === 'btnCopyAll'){ copyAll(); return; }
+  if(t.id === 'btnPrintAll'){ printAll(); return; }
+  if(t.id === 'btnTplReset'){ if(S.set.fmt === 'text') S.set.tplText = ''; else S.set.tplLetter = ''; save(); renderSettings(); renderLetters(); return; }
+  if(t.id === 'btnUnlock'){ unlock(); return; }
+  if(t.id === 'buyLink'){ buyClick(e, t); return; }
+  if(t.hasAttribute('data-del')){
+    var id = t.getAttribute('data-del'); S.clients = S.clients.filter(function(c){ return c.id !== id; }); delete S.ans[id]; save(); renderClients(); compute(); renderResults(); started(); return;
+  }
+  if(t.hasAttribute('data-copy')){ copyOne(t.getAttribute('data-copy')); return; }
+  if(t.hasAttribute('data-ans')){
+    var fid = t.getAttribute('data-for'), v = t.getAttribute('data-ans');
+    if(v) S.ans[fid] = v; else delete S.ans[fid];
+    save(); renderLetters(); trackOnce('status-set'); return;
+  }
+  if(t.hasAttribute('data-fmt')){ S.set.fmt = t.getAttribute('data-fmt'); save(); renderSettings(); renderLetters(); if(S.set.fmt === 'text') trackOnce('fmt-text'); return; }
+});
+$('reason').addEventListener('change', function(){ S.set.reason = this.value; save(); $('reasonBox').hidden = S.set.reason !== 'custom'; if(S.set.reason === 'custom') $('reasonTxt').focus(); renderLetters(); });
+$('proKey').addEventListener('keydown', function(e){ if(e.key === 'Enter') unlock(); });
+
+renderAll();
+try{ var seenPro = false; new IntersectionObserver(function(es){ es.forEach(function(x){ if(x.isIntersecting && !seenPro && !isPro()){ seenPro = true; track('pro-view'); } }); }).observe($('proSec')); }catch(e){}
+if(GC_CODE){ var gs = document.createElement('script'); gs.async = true; gs.src = '//gc.zgo.at/count.js'; gs.setAttribute('data-goatcounter', 'https://' + GC_CODE + '.goatcounter.com/count'); document.head.appendChild(gs); }
+(function(){
+  var q = new URLSearchParams(location.search);
+  var via = (q.get('via') || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 20), af = (q.get('a') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
+  if(via) track('via-' + via);
+  if(af) track('aff-' + af);
+  if(q.get('bought') === '1' && !isPro()) setTimeout(function(){ $('proSec').scrollIntoView(); $('proKey').focus(); }, 400);
+  if(via.indexOf('selftest') === 0 && q.get('fire') === 'all'){   // live check only: every event once, plus the .selftest copy of funnel events
+    ['tool-start','plan-made','letter-used','status-set','paste-used','pro-view','pro-limit','buy-click','pro-unlocked','pro-gift',
+     'letter-copy','letters-copy-all','letters-print','csv','tpl-edit','fmt-text','example-clear','pro-notfound','round-applied','greet-edit'].forEach(function(n){ track(n); });
+  }
+})();
+window.RRP = {state:function(){ return S; }, plan:function(){ return P; }, pending:function(){ return QUEUE.length + (SENDING ? 1 : 0); }};   // for tests
+})();
+</script>
+</body>
+</html>
