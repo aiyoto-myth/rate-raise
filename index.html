@@ -517,8 +517,10 @@ var FUNNEL_EV = {'tool-start':1, 'plan-made':1, 'letter-used':1, 'status-set':1,
 var ONCE = {}, QUEUE = [], SENDING = false, GC_READY = 0;
 /* One hit every 700 ms; the first waits 1.5 s after count.js loads. GoatCounter's /count takes about 4 requests/second per IP+UA
    and silently drops the rest (bizz-handbell 11-24 live test). */
+var SELFTEST = SRC.indexOf('selftest') === 0;   // self-tests send only "<event>.selftest*" so they never touch the real counts (marketing/TESTS.md)
 function track(name){
   try{
+    if(SELFTEST){ if(name.indexOf('via-') !== 0) name = name + '.' + SRC; QUEUE.push(name); drain(); return; }
     if(SRC && FUNNEL_EV[name]) QUEUE.push(name + '.' + SRC);
     QUEUE.push(name); drain();
   }catch(e){}
@@ -851,9 +853,10 @@ function buyClick(e, a){
   var url = a.href, gone = false;
   function go(){ if(!gone){ gone = true; location.href = url; } }
   QUEUE = QUEUE.filter(function(n){ return n.indexOf('buy-click') !== 0; });
-  if(SRC) QUEUE.unshift('buy-click.' + SRC); QUEUE.splice(SRC ? 1 : 0, 0, 'buy-click');
+  var mine = SELFTEST ? ['buy-click.' + SRC] : SRC ? ['buy-click.' + SRC, 'buy-click'] : ['buy-click'];
+  QUEUE = mine.concat(QUEUE);
   var t0 = Date.now();
-  (function wait(){ if(Date.now() - t0 > 3500 || (QUEUE.indexOf('buy-click') < 0 && QUEUE.indexOf('buy-click.' + SRC) < 0 && !SENDING)) go(); else setTimeout(wait, 100); })();
+  (function wait(){ if(Date.now() - t0 > 3500 || (!mine.some(function(n){ return QUEUE.indexOf(n) >= 0; }) && !SENDING)) go(); else setTimeout(wait, 100); })();
   drain();
 }
 
