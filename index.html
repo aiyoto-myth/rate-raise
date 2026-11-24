@@ -153,6 +153,7 @@ footer.site{margin:40px 0 30px;font-size:15px}
   #printArea{display:block}
   .pl{page-break-after:always;font:12pt/1.6 Georgia,serif;white-space:pre-wrap;padding:24pt 10pt}
   .pl:last-child{page-break-after:auto}
+  .pto{font:10pt/1.4 Arial,sans-serif;border-bottom:1px solid #999;padding-bottom:4pt;margin-bottom:14pt}
 }
 </style>
 </head>
@@ -183,16 +184,18 @@ footer.site{margin:40px 0 30px;font-size:15px}
               <div class="help">Bigger gaps are split into steps.</div></div>
             <div><label for="gap">Time between steps</label><select id="gap"><option value="3">3 months</option><option value="6">6 months</option><option value="12">12 months</option></select></div>
             <div><label for="round">Round new prices to</label><select id="round"><option value="1">nearest 1</option><option value="5">nearest 5</option><option value="10">nearest 10</option></select></div>
-            <div><label for="skip">Skip raises smaller than</label><input id="skip" type="text" inputmode="decimal"></div>
+            <div><label for="skip">Skip raises smaller than</label><input id="skip" type="text" inputmode="decimal"><div class="help">Also the smallest single step, so nobody gets a notice for a tiny change. It can go past the % limit above.</div></div>
             <div><label for="loyal">Old clients pay less than new by</label><select id="loyal"><option value="0">0% (same as new)</option><option value="5">5%</option><option value="10">10%</option><option value="15">15%</option></select></div>
             <div><label for="start">New prices start</label><input id="start" type="date"><div class="help" id="noticeHelp"></div></div>
             <div><label for="months">Months a year you work</label><select id="months"><option value="12">All year</option><option value="10">10 months</option><option value="9">9 months</option><option value="8">8 months</option><option value="7">7 months</option><option value="6">6 months</option></select>
-              <div class="help">Lawn or pool season? Weekly then means about 4 visits a month, only in season.</div></div>
+              <div class="help">Lawn or pool season? Weekly then means about 4 visits a month, only in season. A client who stays all year: set "How often" to Other and type their visits a year.</div></div>
             <div><label for="voice">Letters speak as</label><select id="voice"><option value="i">I (just me)</option><option value="we">We (my team)</option></select></div>
             <div><label for="cur">Currency</label><select id="cur"><option value="$">$</option><option value="£">£</option><option value="€">€</option></select></div>
             <div><label for="service">What you call a visit</label><input id="service" type="text" list="svcList" placeholder="cleaning"><datalist id="svcList"><option value="cleaning"><option value="lawn service"><option value="pool service"><option value="window cleaning"><option value="service"></datalist></div>
             <div><label for="me">Your name (signs the letters)</label><input id="me" type="text" autocomplete="name"></div>
             <div><label for="biz">Business name</label><input id="biz" type="text" autocomplete="organization"></div>
+            <div><label for="phone">Phone for the letters (optional)</label><input id="phone" type="text" autocomplete="tel"></div>
+            <div><label for="unit">Price is per</label><input id="unit" type="text" list="unitList" placeholder="visit"><datalist id="unitList"><option value="visit"><option value="clean"><option value="mow"><option value="month"></datalist></div>
           </div>
         </details>
       </section>
@@ -337,14 +340,18 @@ var RR = (function(){
     r.full = rnd(s.rate * h, s.round, 'down');                                   // a new client's price, never rounded above the rate
     r.target = s.loyal > 0 ? rnd(s.rate * h * (1 - s.loyal), s.round, 'down') : r.full;
     if(!(s.rate > 0) || r.target - price < Math.max(s.skip || 0, 0.01)){ r.kind = 'ok'; r.new1 = price; return r; }
-    var cur = price;
+    /* Each step is at least `minStep` (the "skip raises smaller than" amount, at least 1): a $1 notice looks petty and costs a letter
+       (r2 owner: "£12 -> £13 -> £14 -> £15", r2 code: "$69 -> $70"). Preference inside the cap: a round number, else whole units.
+       A step may pass the cap only to reach minStep, or to finish when what's left would be smaller than minStep. */
+    var minStep = Math.max(s.skip || 0, 1), cur = price;
     while(cur < r.target - 1e-9 && r.steps.length < 4){
       var lim = cur * (1 + cap), nx;
       if(r.target <= lim + 1e-9) nx = r.target;
       else {
         nx = rnd(lim, s.round, 'down');                                            // a round number inside the cap
-        if(nx <= cur) nx = Math.floor(lim + 1e-9);                                 // the cap is smaller than one rounding step: whole units
-        if(nx <= cur) nx = Math.floor(cur) + 1;                                    // tiny prices: one unit up
+        if(nx - cur < minStep - 1e-9) nx = Math.floor(lim + 1e-9);                 // too small: whole units inside the cap
+        if(nx - cur < minStep - 1e-9) nx = rnd(cur + minStep, 1, 'up');            // still too small: the minimum step, past the cap
+        if(r.target - nx < minStep - 1e-9) nx = r.target;                          // don't leave a tiny last step
         nx = Math.min(nx, r.target);
       }
       if(nx <= cur) break;
@@ -400,11 +407,11 @@ var RR = (function(){
     while(inner.test(t) && guard++ < 200){
       t = t.replace(inner, function(_, body){
         var empty = false;
-        body.replace(/\{(\w+)\}/g, function(__, k){ if(v[k] == null || v[k] === '') empty = true; return ''; });
+        body.replace(/\{(\w+)\}/g, function(__, k){ if(!Object.prototype.hasOwnProperty.call(v, k) || v[k] == null || v[k] === '') empty = true; return ''; });
         return empty ? '' : body;
       });
     }
-    t = t.replace(/\{(\w+)\}/g, function(m, k){ return v.hasOwnProperty(k) ? (v[k] == null ? '' : String(v[k])) : m; });
+    t = t.replace(/\{(\w+)\}/g, function(m, k){ return Object.prototype.hasOwnProperty.call(v, k) ? (v[k] == null ? '' : String(v[k])) : m; });
     return t.replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').replace(/[ \t]{2,}/g, ' ').replace(/ +([.,!?])/g, '$1').trim();
   }
   function money(x, sym){
@@ -423,9 +430,11 @@ var RR = (function(){
      "123 Oak St" -> there. The user can always type their own greeting per client. */
   function greet(name){
     var s = String(name || '').trim().replace(/\s+/g, ' ');
-    if(!s || /^\d/.test(s)) return 'there';
-    if(/^[^,]+,\s*[^,]+$/.test(s)) return s.split(',')[1].trim().split(' ')[0];
-    if(/\s(and|&)\s/i.test(s) || /^(mr|mrs|ms|miss|dr|mx)\.?\s/i.test(s)) return s;
+    if(!s || /\d/.test(s)) return 'there';                                         // addresses: "Flat 3, 22 High St"
+    if(/\b(hoa|llc|inc|ltd|plc|co|corp|association|assoc|apartments?|condos?|church|school|office|offices|clinic|centre|center|hotel|properties|property|management|group|club)\b\.?/i.test(s)) return s;   // a business: greet it by name
+    if(/^[a-z][a-z' -]*,\s*[a-z][a-z'-]{1,}(\s[a-z' -]*)?$/i.test(s) && !/^(mr|mrs|ms|miss|dr|mx)$/i.test(s.split(',')[1].trim().split(' ')[0])) return s.split(',')[1].trim().split(' ')[0];   // "Smith, John" (not "Smith, J." or "Jones, Dr")
+    if(/\s(and|&)\s/i.test(s) || /^(mr|mrs|ms|miss|dr|mx)\.?\s/i.test(s) || /^[a-z]\.?(\s|$)/i.test(s)) return s;   // couples, titles, "J. Brown"
+    if(s.indexOf(',') >= 0) return s;                                            // "Smith, J.", "Jones, Dr": as written
     var t = s.split(' ');
     if(/^the$/i.test(t[0]) && t.length > 1) return t.slice(1).join(' ');
     return t[0];
@@ -447,7 +456,7 @@ var RR = (function(){
     return null;
   }
   /* one line -> cells: tab wins, then semicolon, then comma; double quotes group a cell ("Smith, John", "$1,200.00") */
-  function sepOf(line){ return line.indexOf('\t') >= 0 ? '\t' : (line.replace(/"[^"]*"/g, '').indexOf(';') >= 0 && line.replace(/"[^"]*"/g, '').indexOf(',') < 0 ? ';' : ','); }
+  function sepOf(line){ var u = line.replace(/"[^"]*"/g, ''); return line.indexOf('\t') >= 0 ? '\t' : ((u.match(/;/g) || []).length >= 2 || (u.indexOf(';') >= 0 && u.indexOf(',') < 0) ? ';' : ','); }
   function cells(line, sep){
     sep = sep || sepOf(line);
     var out = [], cur = '', q = false;
@@ -460,32 +469,36 @@ var RR = (function(){
     }
     out.push(cur.trim()); return out;
   }
-  var HEAD = {name:/^(name|client|customer)/, price:/price|rate|charge|amount|fee|\$|£|€/, hours:/hour|hrs|time|duration|length/, often:/often|freq|interval|schedule|every/,
-              since:/since|start|year|joined/, per:/visits? (a|per) ?year|per year/};
+  var HEAD = {name:/^(name|client|customer)/, price:/^(?!.*(hour|hourly|\/h|per h)).*(price|rate|charge|amount|fee|cost|\$|£|€)/, hours:/hour|hrs|time|duration|length|mins?\b|minutes/,
+              often:/often|freq|interval|schedule|every/, since:/since|start|year|joined/, per:/visits? (a|per) ?year|per year/, addr:/address|street|addr|location/, greet:/greeting|salutation|first name/};
   /* rows: name, price per visit, hours of work, how often, client since (year), visits a year (for "other").
      A header row (ours from "Download as CSV", or anyone's with recognisable names) sets the column order. */
   function parsePaste(text){
-    var out = [], bad = [], col = {name:0, price:1, hours:2, often:3, since:4, per:5}, sep = null;
+    var out = [], bad = [], col = {name:0, price:1, hours:2, often:3, since:4, per:5}, sep = null, err = '';
     String(text || '').split(/\r?\n/).forEach(function(line, i){
-      if(!line.trim()) return;
+      if(!line.trim() || err) return;
       var f = cells(line, sep);                                                   // after a header row its separator holds for every line
       if(!out.length && !bad.length && !(num(f[1]) > 0) && f.some(function(x){ return HEAD.name.test(x.toLowerCase()); })){
         var c2 = {};
         f.forEach(function(x, j){ x = x.toLowerCase();
           if(HEAD.per.test(x)){ if(c2.per == null) c2.per = j; return; }
-          ['name','price','hours','often','since'].some(function(k){ if(c2[k] == null && HEAD[k].test(x)){ c2[k] = j; return true; } return false; }); });
-        if(c2.name != null && c2.price != null && c2.hours != null){ col = c2; sep = sepOf(line); return; }
+          if(HEAD.hours.test(x) && c2.hours == null && /mins?\b|minutes/.test(x)) c2.mins = true;
+          ['greet','name','price','hours','often','since','addr'].some(function(k){ if(c2[k] == null && HEAD[k].test(x)){ c2[k] = j; return true; } return false; }); });
+        if(c2.name != null && c2.price != null){ col = c2; sep = sepOf(line); return; }   // no hours column is fine: the rows ask for hours
+        if(c2.name != null && c2.price == null){ err = 'There is no price-per-visit column in the header row (an hourly rate is not a price per visit).'; return; }
       }
-      var price = num(f[col.price]), h = hours(f[col.hours]);
-      if(!(price > 0) || !(h > 0)){ bad.push(i + 1); return; }
+      var price = num(f[col.price]), hText = col.hours != null ? String(f[col.hours] || '').trim() : '';
+      if(col.mins && /^\d+(\.\d+)?$/.test(hText)) hText += 'm';                   // a "Time (mins)" column: 20 means 20 minutes (r2 owner)
+      var h = hours(hText);
+      if(!(price > 0) || (hText && !(h > 0))){ bad.push(i + 1); return; }       // a blank hours cell is fine (the row asks for it); nonsense is not
       var fq = freqOf(col.often != null ? f[col.often] : '') || {freq:'w2', guessed:true};
       var per = col.per != null ? num(f[col.per]) : NaN;
       if(fq.freq === 'x' && !fq.perYear && per > 0) fq.perYear = per;
       var since = col.since != null ? String(f[col.since] || '').trim() : '';
-      out.push({name:String(f[col.name] || '').slice(0, 60), price:String(price), hours:String(Math.round(h * 100) / 100), freq:fq.freq,
-                perYear: fq.perYear ? String(fq.perYear) : '', since:/^\d{4}$/.test(since) ? since : '', guessed:!!fq.guessed, oftenText:String(col.often != null ? f[col.often] || '' : '')});
+      out.push({name:String(f[col.name] || '').slice(0, 60), price:String(price), hours: h > 0 ? hText : '', freq:fq.freq, addr: col.addr != null ? String(f[col.addr] || '').slice(0, 80) : '',
+                greet: col.greet != null ? String(f[col.greet] || '').slice(0, 60) : '', perYear: fq.perYear ? String(fq.perYear) : '', since:/^\d{4}$/.test(since) ? since : '', guessed:!!fq.guessed, oftenText:String(col.often != null ? f[col.often] || '' : '')});
     });
-    return {rows:out, bad:bad};
+    return err ? {rows:[], bad:[], error:err} : {rows:out, bad:bad};
   }
   return {FREQ:FREQ, num:num, hours:hours, perYear:perYear, rnd:rnd, isDate:isDate, addMonths:addMonths, daysBetween:daysBetween, defaultStart:defaultStart,
           client:client, plan:plan, outcome:outcome, fill:fill, money:money, years:years, greet:greet, freqOf:freqOf, cells:cells, parsePaste:parsePaste};
@@ -503,7 +516,7 @@ var VERIFY_URL = 'https://app-bizz-api.whop.site/api/verify';
 var CHECKOUT_HOME = 'https://whop.com/checkout/ch_X8JIByUQpvcCKAT/';     // $19 one-time, returns to SITE?bought=1#proSec
 var CHECKOUT_PLAN = 'https://whop.com/checkout/plan_h6dnz1U9Uk3hb';      // same price; used with ?a=<affiliate>
 var PRICE = '$19';
-var GIFT = [];                                                     // SHA-256 of gift codes handed out in letters
+var GIFT = ['a06dff450bb872b7fa94e8f8d31a7744117543be6a29ac5d2cbdb6e9b649da3d','53d8a197ba2830607e9460adc3bae1b0d9b8a3e8b614b234a12b573cabab9260','18adcbb466f4c2ed777fe351fe4dbbec2debcdc8339c7fe61e41b164e601cbb6','2ae5ae6823a08772ad693870056425c4119a9f081147818b0094938d1c5068b8','17ca32d1e8a2531a266ad45bfce6c536f0fa6216832bfd4d638c8b00f7ffba75','02dccc3183798ec073e56e7efdcf913839c1968243677e5714d844a9e4f1bc46','2ddbb898d1b6140b812fb0f2d8a66406c8dfe36d2cced8e9d022bafd10e37b27','9ac52aebea1fdc126fd00db5db1fe368e2fef86a46114e7cfb42b8c01dafb527','29d19831fd9d92277b404f920003f5182cdd32cbce6e50b7d02ae86def38a4e1','ebfce43d2180334aca1e4bac4637fb07c85a4196d309f38b4968a9a56b356ea0','8768998fc7a23473626c02bf53919787a95afe5fce011510962dffffc9ec956a','2cbb7419d974d37efff4098405df1ee876f1cf4990ec1804bd9ae223aea94206','6b7c779c44769e053fbb5c9c1a545bf6a968e83f3558371be903a992231209d3','4d2d6c7eb726e031d7ef8019cd5d820b4743cfe2f60fec3ca5477d989c741ed9','3f8ceb542b9585bb123a20099ba5ec748a6ae7e0f8d4fca662b57b91f84aa720','135daa17f0d3865ec039d5d73eb6b32142da23f201c1ea351108236624be7740','608241fae8afacfec0c2d2b54db66fb70fe86f12474417c411ed1b223a1c8058','6f0953c2c3b2dd0fb2cef86e99b8631f8b25c3fd32fb9ebfa86c33c084f98409','0b1ae3b8c58f95d1225f38d4bc272d04dc9c4c63d8d726b6477bc9cc5788ddc4','0f8ebf3366060a12c3a8e436ec2fd8c0d001cdb395f08df0388da025c05b2b31','2409fcf1a31f66a2fbfc468a0722b0436d8b7420253d94e2f9f9078b73bc7968','f8a494942be26d6ca388c0d5eafc53aa85eb950fec4d2f3ef052d02dad109b94','76bbcb617a15ad18d19851a87555d4be14d3f2ade2dcf2cf0ae227026fb59344','1d0fd26b862126aff6ccc6d2632ae8e73e0a8bbf5a485897688134703ac0e5b1','c30d03a76cec42c08d581cb7d64eddc230986e8aa5ef1519760786a935316ed6','bbccd9a42f5809a7ebe043fbfbe6cdce4e7b16b37757df4ac4f869657db012b3','e9b7b0973c300ec4c5eb0825c330edb422fb5c4bb47c5de14ddba1b922b23469','f0e37b06170217bbee36970cf73428226347817c27fc3ed9a0729a7306cadfe3','795b381577159b99c4895fc1cb480f6d48f54d9e120b781477619d5479a84bae','16afdae8441d10db2add074b10c28d2dc1f591dfccfdf5e2323d6fd116d00476','d1c209e49ac6ac7dee371f2b3420136675b9819a74c53b304c1b644fa3c4e9aa','c80376a6dbf18c3370cd7fc88ade522f62e0efe2af10a244c21c5ef4d6821b2c','52d3a5f64003e4ce45d55695a565cf2bcda79dd55101659c6b5c786431565f69','024f2bd316cf14a94f304aac61ed51c919b4fecf993addd8c20e5ed25a66bb2e','1f4304bf91fb1f72b13e6f40c9921ad8b7171fc8364f14210f584750b548aba1','27a5b1dc6df24b073c88d36036bc22b9b48423646fb4020be059d6f9e3f93d9d','b8ee8cc02b1331de00101dbbbe00e8000a4c2b9b96c45ca7336eabe92ebcdd1a','b13fc9811fc46a34717d9d0fc76aae46defdbb726d58899c75a7e183f2764d3b','5bcc55ffc16a92a6f9a9c26fe657e10887ed7220410dfa7acdd59c7099e34127','8c12d057bdd23bbe3f4626df4a1db909a7e41582a494e5cf955508dc1438c6e7','2b37baf1860cbff30cbe500076981edf1cc2f888b9522217a30acc9972be6ce6','3de0a12028a59830d51920fe4830e69e9a6447e1f7216a26763a28f3accb1670','635739728a6c39688cbc42f39f3a136a982a1cb15bc798a4b2a24b530b640f0b','14f014e79c3e055eca9ffd4c04b5e6f4de6cd351def0a1b7e8d7fa626c475ae5','e4a89642552dd8e811565897689bd9c10e237af81902f4a77060dd7f33c13da6','1c4f0f7afedd5f249801b3a82a41f9f91fbfd0d5379b427c503eb628aab6d45c','f1092a07f3114d7036e0b23ce0cedc397e7fcf87b52dcc6c8fdfad36ec5a38ba'];                                                     // SHA-256 of gift codes handed out in letters
 var KEY = 'rr.v1', PROKEY = 'rr.pro', FREE_N = 8, MAX_N = 400;
 
 /* ---------- measurement (GoatCounter). The ?via code follows the visitor down the funnel (Family Formals / Handbell Chart pattern). ---------- */
@@ -544,28 +557,28 @@ function uid(){ return 'c' + Date.now().toString(36) + (seq++).toString(36); }
 function isoToday(){ var d = new Date(); return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())).toISOString().slice(0, 10); }
 var TODAY = isoToday();
 var DEF = {
-  i:  {letter:'Hi {first},\n\nThank you for having me look after your home[[ for {years}]]. I\'m writing to let you know that from {date}, your regular {service} will be {new} per visit (it\'s {old} now).[[ {next}]]\n\n{reason}\n\n[[{below}]]\n\nIf you have any questions, just reply or give me a call.\n\nThank you,\n{me}[[\n{business}]]',
-       text:'Hi {first}[[, it\'s {me}]]. From {date} your {service} will be {new} per visit (now {old}).[[ {next_short}]] {reason_short} Thank you!'},
-  we: {letter:'Hi {first},\n\nThank you for having us look after your home[[ for {years}]]. We\'re writing to let you know that from {date}, your regular {service} will be {new} per visit (it\'s {old} now).[[ {next}]]\n\n{reason}\n\n[[{below}]]\n\nIf you have any questions, just reply or give us a call.\n\nThank you,\n{me}[[\n{business}]]',
-       text:'Hi {first}[[, it\'s {me}[[ from {business}]]]]. From {date} your {service} will be {new} per visit (now {old}).[[ {next_short}]] {reason_short} Thank you!'}
+  i:  {letter:'Hi {first},\n\nThank you for being a client[[ for {years}]]. I\'m writing to let you know that from {date}, your regular {service} will be {new} per {unit} (it\'s {old} now).[[ {next}]]\n\n{reason}\n\n[[{below}]]\n\nIf you have any questions, just reply or give me a call[[ on {phone}]].\n\nThank you,\n{me}[[\n{business}]]',
+       text:'Hi {first}[[, it\'s {me}]]. From {date} your {service} will be {new} per {unit} (now {old}).[[ {next_short}]] {reason_short} Thanks!'},
+  we: {letter:'Hi {first},\n\nThank you for being a client[[ for {years}]]. We\'re writing to let you know that from {date}, your regular {service} will be {new} per {unit} (it\'s {old} now).[[ {next}]]\n\n{reason}\n\n[[{below}]]\n\nIf you have any questions, just reply or give us a call[[ on {phone}]].\n\nThank you,\n{me}[[\n{business}]]',
+       text:'Hi {first}[[, it\'s {me}[[ at {business}]]]]. From {date} your {service} will be {new} per {unit} (now {old}).[[ {next_short}]] {reason_short} Thanks!'}
 };
 var REASONS = {
   i:  {costs:['My costs for insurance, fuel and supplies have gone up, and this lets me keep doing the work the way you\'re used to.', 'My costs have gone up.'],
-       team: ['It lets me keep paying my helpers fairly, so the same people keep coming to your home.', 'It helps me pay my helpers fairly.'],
+       team: ['It lets me keep paying my helpers fairly, so you keep seeing the same faces.', 'It helps me pay my helpers fairly.'],
        time: ['My prices haven\'t changed in a while, and this brings yours closer to what I charge today.', 'My prices haven\'t changed in a while.'],
        none: ['', '']},
   we: {costs:['Our costs for insurance, fuel and supplies have gone up, and this lets us keep doing the work the way you\'re used to.', 'Our costs have gone up.'],
-       team: ['It lets us keep paying our team fairly, so the same people keep coming to your home.', 'It helps us pay our team fairly.'],
+       team: ['It lets us keep paying our team fairly, so you keep seeing the same faces.', 'It helps us pay our team fairly.'],
        time: ['Our prices haven\'t changed in a while, and this brings yours closer to what we charge today.', 'Our prices haven\'t changed in a while.'],
        none: ['', '']}
 };
 function voice(){ return S.set.voice === 'we' ? 'we' : 'i'; }
 function defaults(){
   return {rate:'', cap:'15', gap:'6', round:'5', skip:'3', loyal:'0', start:RR.defaultStart(TODAY, 30), cur:'$', service:'cleaning', me:'', biz:'',
-          fmt:'letter', reason:'costs', reasonTxt:'', tplLetter:'', tplText:'', months:'12', voice:'i'};
+          fmt:'letter', reason:'costs', reasonTxt:'', tplLetter:'', tplText:'', months:'12', voice:'i', phone:'', unit:'visit', exRate:''};
 }
 function example(){
-  var s = defaults(); s.rate = '60';
+  var s = defaults(); s.rate = '60'; s.exRate = '1'; s.me = 'Jess'; s.biz = 'Bright Home Cleaning';
   var c = [['Ann Miller', 110, 2.5, 'w2', '2019'], ['Raj Okafor', 140, 2.5, 'w2', '2022'], ['The Lee family', 160, 3, 'w1', '2023'],
            ['Maria Garcia', 90, 2, 'm1', '2016'], ['Tom Brooks', 120, 2, 'w2', '2024'], ['Priya Patel', 185, 3, 'w4', '2025']];
   return {v:1, set:s, clients:c.map(function(x){ return {id:uid(), name:x[0], price:String(x[1]), hours:String(x[2]), freq:x[3], perYear:'', since:x[4], ex:true}; }), ans:{}};
@@ -579,7 +592,7 @@ function valid(st){
   if(!REASONS.i.hasOwnProperty(st.set.reason) && st.set.reason !== 'custom') st.set.reason = 'costs';
   st.clients = st.clients.filter(function(c){ return c && typeof c.id === 'string' && /^[A-Za-z0-9]{1,24}$/.test(c.id); }).slice(0, MAX_N);
   st.clients.forEach(function(c){
-    ['name','price','hours','perYear','since','greet','oftenText'].forEach(function(k){ c[k] = String(c[k] == null ? '' : c[k]).slice(0, 80); });
+    ['name','price','hours','perYear','since','greet','oftenText','addr'].forEach(function(k){ c[k] = String(c[k] == null ? '' : c[k]).slice(0, 80); });
     if(!RR.FREQ[c.freq]) c.freq = 'w2'; c.ex = !!c.ex; c.check = !!c.check;
   });
   if(!st.ans || typeof st.ans !== 'object') st.ans = {};
@@ -610,7 +623,7 @@ var toastT = 0;
 function say(t){ var el = $('toast'); el.textContent = t; el.className = 'on'; clearTimeout(toastT); toastT = setTimeout(function(){ el.className = ''; }, 3200); }
 
 /* ---------- step 1: rate and rules ---------- */
-var SET_IDS = ['rate','cap','gap','round','skip','loyal','start','cur','service','me','biz','months','voice'];
+var SET_IDS = ['rate','cap','gap','round','skip','loyal','start','cur','service','me','biz','months','voice','phone','unit'];
 function renderSettings(){
   SET_IDS.forEach(function(k){ var el = $(k); if(el && el.value !== S.set[k]) el.value = S.set[k]; });
   $('curSym').textContent = S.set.cur;
@@ -651,9 +664,10 @@ function renderResults(){
     var el = $('r_' + c.id); if(!el) return; var r = rowById(c.id);
     if(!r || !r.valid){ el.innerHTML = '<span class="empty">' + ({price:'Add the price per visit.', hours:'Add the hours of work per visit (all workers together).', often:'Add how many visits a year.'}[r && r.why] || 'Add the price per visit and hours of work.') + '</span>'; return; }
     var chk = c.check ? '<span class="chk">Check how often' + (c.oftenText ? ' (you pasted "' + esc(c.oftenText) + '")' : '') + '</span>' : '';
+    if(r.hours > 12) chk += '<span class="chk">' + Math.round(r.hours) + ' hours a visit? If that\'s minutes, type ' + Math.round(r.hours) + 'm.</span>';
     var hr = chk + '<span class="hr ' + (st.rate > 0 && r.hourly < st.rate - 0.5 ? 'low' : 'fine') + '">' + M(r.hourly) + '/hr now</span>';
     if(!(st.rate > 0)){ el.innerHTML = hr + '<span class="empty">Put your rate in step 1.</span>'; return; }
-    if(r.kind === 'ok'){ el.innerHTML = hr + '<span class="tag same">' + M(r.price) + ' stays</span><span class="steps">already at your rate</span>'; return; }
+    if(r.kind === 'ok'){ el.innerHTML = hr + '<span class="tag same">' + M(r.price) + ' stays</span><span class="steps">' + (r.price >= r.target ? (r.hourly >= st.rate - 0.5 ? 'already at your rate' : 'at your rate once rounded to the nearest ' + M(st.round)) : 'a raise would be under ' + M(Math.max(st.skip, 0.01)) + ' (your "skip" amount)') + '</span>'; return; }
     var pct = Math.round((r.new1 / r.price - 1) * 100);
     var more = r.steps.length > 1 ? 'then ' + r.steps.slice(1).map(function(x, i){ return M(x) + ' (' + shortDate(r.dates[i + 1]) + ')'; }).join(', ') + (r.reach ? '' : ', still under your rate') : '';
     el.innerHTML = hr + '<span class="old">' + M(r.price) + '</span><span class="tag">' + M(r.new1) + '</span><span>+' + pct + '% from ' + shortDate(r.dates[0]) + '</span>' + (more ? '<span class="steps">' + more + '</span>' : '');
@@ -669,7 +683,7 @@ function renderSummary(){
   if(!(st.rate > 0)){ el.innerHTML = '<h2 id="hSum">What the raise is worth</h2><p class="empty">Put in your rate (step 1) and at least one client (step 2).</p>'; return; }
   if(!P.valid){ el.innerHTML = '<h2 id="hSum">What the raise is worth</h2><p class="empty">Add a client with a price per visit and hours of work.</p>'; return; }
   var days = RR.daysBetween(TODAY, st.start), okN = P.valid - P.raised;
-  var h = '<h2 id="hSum">What the raise is worth' + (allExample() ? ' (example)' : '') + '</h2>'
+  var h = '<h2 id="hSum">What the raise is worth' + (hasExample() ? ' (with example clients)' : '') + '</h2>'
     + '<div class="big' + (P.gain < 0 ? ' neg' : '') + '" style="margin-top:10px">' + (P.gain >= 0 ? '+' : '') + M(Math.round(P.gain)) + '</div>'
     + '<div>a year if every client stays, this first round only.</div>'
     + '<div class="kv"><span>Yearly from regular clients now</span><b>' + M(Math.round(P.R0)) + '</b>'
@@ -704,7 +718,7 @@ function letterFor(c, r){
     below: r.kind === 'raise' && r.underNew ? 'That\'s still less than new clients pay, as a thank-you for staying with ' + (voice() === 'we' ? 'us' : 'me') + '.' : '',
     next: later.length ? 'To keep each change small, ' + who + ' bring it up the rest of the way in steps: ' + later.join(', then ') + '.' : '',
     next_short: later.length ? 'Then ' + later.join(', then ') + '.' : '',
-    me: S.set.me.trim(), business: S.set.biz.trim()
+    me: S.set.me.trim(), business: S.set.biz.trim(), phone: S.set.phone.trim(), unit: S.set.unit.trim() || 'visit'
   });
 }
 function raisedList(){
@@ -720,7 +734,8 @@ function renderLetters(){
   g.innerHTML = warn + L.map(function(x){
     var a = S.ans[x.c.id] || '';
     return '<article class="letter" data-id="' + x.c.id + '"><header><h3>' + esc(x.c.name.trim() || 'Unnamed client') + '</h3><span class="old">' + M(x.r.price) + '</span><span class="tag">' + M(x.r.new1) + '</span></header>'
-      + '<label class="greet">Hi <input data-greet="' + x.c.id + '" type="text" value="' + esc(x.c.greet || RR.greet(x.c.name)) + '" aria-label="Greeting for ' + esc(x.c.name.trim() || 'this client') + '" maxlength="60"></label>'
+      + '<label class="greet">Hi <input data-greet="' + x.c.id + '" type="text" value="' + esc(x.c.greet) + '" placeholder="' + esc(RR.greet(x.c.name)) + '" aria-label="Greeting for ' + esc(x.c.name.trim() || 'this client') + '" maxlength="60"></label>'
+      + '<label class="greet">Address <input data-addr="' + x.c.id + '" type="text" value="' + esc(x.c.addr) + '" placeholder="optional, printed on the note" aria-label="Address for ' + esc(x.c.name.trim() || 'this client') + '" maxlength="80"></label>'
       + '<pre id="lt_' + x.c.id + '">' + esc(letterFor(x.c, x.r)) + '</pre>'
       + '<footer><button class="btn small" data-copy="' + x.c.id + '">Copy</button><span style="flex:1"></span>'
       + ANS.map(function(o){ return '<button class="chip' + (o[0] === 'ok' ? ' okc' : o[0] === 'leaving' ? ' lv' : '') + '" data-ans="' + o[0] + '" data-for="' + x.c.id + '" aria-pressed="' + (a === o[0]) + '">' + o[1] + '</button>'; }).join('')
@@ -738,19 +753,29 @@ function renderOutcome(){
     + (o.vsNow < 0 ? '<span class="warn">' + M(Math.round(o.vsNow)) + ' compared with today</span>' : '+' + M(Math.round(o.vsNow)) + ' compared with today')
     + (o.leaving ? ', and you get back about ' + Math.round(o.hoursFreed) + ' hours a year (' + M(Math.round(P.hourly0)) + ' → ' + M(Math.round(o.hourly)) + ' per hour of work)' : '') + '.'
     + (o.vsNow < 0 && o.leaving && settings().rate > 0 ? ' Fill ' + (o.hoursFreed > 40 ? 'some of ' : '') + 'those hours at your new-client rate to get back ahead.' : '')
-    + '<div class="row" style="margin-top:10px"><button class="btn small" id="btnApply">This round is done: make the new prices current</button></div>';
+    + (hasExample() ? '' : '<div class="row" style="margin-top:10px"><button class="btn small" id="btnApply">This round is done: make the new prices current for clients you told</button></div>');
 }
 
+/* Only clients who were told (Told / Said OK) take the new price; Not told keep theirs and their letter (r2: "gives new prices to clients
+   who were never told"). Leaving clients are removed only if the user confirms; otherwise they stay marked Leaving. */
 function applyRound(){
+  if(hasExample()){ say('Start with your own clients first.'); return; }
   var leaving = S.clients.filter(function(c){ return S.ans[c.id] === 'leaving'; });
-  var n = 0;
-  S.clients.forEach(function(c){ var r = rowById(c.id); if(r && r.valid && r.new1 > r.price && S.ans[c.id] !== 'leaving'){ c.price = String(r.new1); n++; } });
+  var n = 0, kept = 0, ans = {};
+  S.clients.forEach(function(c){
+    var r = rowById(c.id), a = S.ans[c.id] || '';
+    if(!(r && r.valid && r.new1 > r.price)) return;
+    if(a === 'told' || a === 'ok'){ c.price = String(r.new1); n++; }
+    else if(a === 'leaving') ans[c.id] = 'leaving';
+    else kept++;
+  });
+  if(!n){ say('Mark who you told (Told or Said OK) first.'); return; }
   if(leaving.length && window.confirm('Remove the ' + leaving.length + ' client' + (leaving.length === 1 ? '' : 's') + ' marked Leaving from your list?')){
-    var gone = {}; leaving.forEach(function(c){ gone[c.id] = 1; }); S.clients = S.clients.filter(function(c){ return !gone[c.id]; });
+    var gone = {}; leaving.forEach(function(c){ gone[c.id] = 1; delete ans[c.id]; }); S.clients = S.clients.filter(function(c){ return !gone[c.id]; });
   }
-  S.ans = {}; S.set.start = RR.addMonths(settings().start, settings().gap);
+  S.ans = ans; S.set.start = RR.addMonths(settings().start, settings().gap);
   save(); track('round-applied'); renderAll();
-  say(n + ' new price' + (n === 1 ? ' is' : 's are') + ' now current. Next round starts ' + longDate(S.set.start) + '.');
+  say(n + ' new price' + (n === 1 ? ' is' : 's are') + ' now current' + (kept ? '; ' + kept + ' not told yet kept the old price' : '') + '. Next round starts ' + longDate(S.set.start) + '.');
 }
 
 /* ---------- copy / print / csv ---------- */
@@ -762,33 +787,33 @@ function fallbackCopy(t){
   var ta = document.createElement('textarea'); ta.value = t; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.top = '-1000px';
   document.body.appendChild(ta); ta.select(); var ok = false; try{ ok = document.execCommand('copy'); }catch(e){} document.body.removeChild(ta); return ok;
 }
-function used(kind){ trackOnce('letter-used'); track(kind); }
+function used(kind, ex){ if(ex){ track('example-' + kind); return; } trackOnce('letter-used'); track(kind); }   // example letters are not use; a returning user's real list is
 function copyOne(id){
   var c = null; S.clients.forEach(function(x){ if(x.id === id) c = x; }); var r = rowById(id); if(!c || !r) return;
   copyText(letterFor(c, r)).then(function(ok){ say(ok ? 'Copied. Paste it into your email or text app.' : 'Couldn\'t copy. Select the text and copy it by hand.'); });
-  used('letter-copy');
+  used('letter-copy', c.ex);
   if(!S.ans[id]){ S.ans[id] = 'told'; save(); renderLetters(); }
 }
 function copyAll(){
   var L = raisedList(); if(!L.length){ say('No letters yet.'); return; }
   var t = L.map(function(x){ return '=== ' + (x.c.name.trim() || 'Unnamed client') + ' ===\n' + letterFor(x.c, x.r); }).join('\n\n');
   copyText(t).then(function(ok){ say(ok ? 'Copied ' + L.length + ' letters.' : 'Couldn\'t copy. Try "Print all letters" instead.'); });
-  used('letters-copy-all');
+  used('letters-copy-all', hasExample());
 }
 function printAll(){
   var L = raisedList(); if(!L.length){ say('No letters yet.'); return; }
-  $('printArea').innerHTML = L.map(function(x){ return '<div class="pl">' + esc(letterFor(x.c, x.r)) + '</div>'; }).join('');
-  used('letters-print');
+  $('printArea').innerHTML = L.map(function(x){ return '<div class="pl"><div class="pto">' + esc([x.c.name.trim(), (x.c.addr || '').trim()].filter(Boolean).join(' · ')) + '</div>' + esc(letterFor(x.c, x.r)) + '</div>'; }).join('');
+  used('letters-print', hasExample());
   setTimeout(function(){ window.print(); }, 50);
 }
 function csvCell(v){ v = String(v == null ? '' : v); return /[",;\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
 function downloadCsv(){
-  var rows = [['name','price per visit','hours of work','how often','client since','visits a year','per hour now','new price','raise %','starts','later steps','answer']];
+  var rows = [['name','price per visit','hours of work','how often','client since','visits a year','per hour now','new price','raise %','starts','later steps','answer','address','greeting']];
   S.clients.forEach(function(c){
     var r = rowById(c.id) || {};
     rows.push([c.name, c.price, c.hours, RR.FREQ[c.freq].label, c.since, c.freq === 'x' ? c.perYear : (r.per ? Math.round(r.per * 10) / 10 : ''), r.valid ? Math.round(r.hourly * 100) / 100 : '',
       r.valid ? r.new1 : '', r.valid && r.new1 > r.price ? Math.round((r.new1 / r.price - 1) * 1000) / 10 : '', r.valid && r.dates && r.dates[0] && r.new1 > r.price ? r.dates[0] : '',
-      r.valid && r.steps && r.steps.length > 1 ? r.steps.slice(1).map(function(x, i){ return x + ' on ' + r.dates[i + 1]; }).join('; ') : '', S.ans[c.id] || '']);
+      r.valid && r.steps && r.steps.length > 1 ? r.steps.slice(1).map(function(x, i){ return x + ' on ' + r.dates[i + 1]; }).join('; ') : '', S.ans[c.id] || '', c.addr || '', c.greet || '']);
   });
   var blob = new Blob([rows.map(function(r){ return r.map(csvCell).join(','); }).join('\r\n')], {type:'text/csv'});
   var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'rate-raise-' + TODAY + '.csv'; document.body.appendChild(a); a.click();
@@ -814,7 +839,7 @@ function renderPro(){
 }
 function proGate(why){
   track('pro-limit');
-  say(why + ' is part of Pro (' + PRICE + ' once).');
+  say(why + ' needs Pro (' + PRICE + ' once).');
   $('proSec').scrollIntoView({behavior:'smooth'});
 }
 function sha256hex(s){
@@ -846,19 +871,20 @@ function unlock(){
     }).catch(function(){ unlocking = false; msg.innerHTML = '<span class="err">Couldn\'t reach the checker. Check your connection and try again.</span>'; });
 }
 
-/* The checkout is on another site, so the queue would be cut off by the page change (r1 code #12): send buy-click first, then go. */
+/* The checkout is on another site: hand buy-click straight to count.js (not the queue) and go within about a second (r1/r2 code #12). */
+var buying = false;
+window.addEventListener('pageshow', function(){ buying = false; });   // back from the checkout (page restored from the back/forward cache): the button works again
 function buyClick(e, a){
-  if(e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1){ track('buy-click'); return; }
-  e.preventDefault();
-  var url = a.href, gone = false;
-  function go(){ if(!gone){ gone = true; location.href = url; } }
-  QUEUE = QUEUE.filter(function(n){ return n.indexOf('buy-click') !== 0; });
-  var mine = SELFTEST ? ['buy-click.' + SRC] : SRC ? ['buy-click.' + SRC, 'buy-click'] : ['buy-click'];
-  QUEUE = mine.concat(QUEUE);
-  var t0 = Date.now();
-  (function wait(){ if(Date.now() - t0 > 3500 || (!mine.some(function(n){ return QUEUE.indexOf(n) >= 0; }) && !SENDING)) go(); else setTimeout(wait, 100); })();
-  drain();
+  if(e.ctrlKey || e.metaKey || e.shiftKey){ track('buy-click'); return; }
+  e.preventDefault(); if(buying) return; buying = true;
+  var url = a.href, names = SELFTEST ? ['buy-click.' + SRC] : SRC ? ['buy-click.' + SRC, 'buy-click'] : ['buy-click'];
+  var gc = window.goatcounter && window.goatcounter.count;
+  function hit(n){ try{ window.goatcounter.count({path:n, title:n, event:true}); }catch(err){} }
+  if(gc){ hit(names[0]); if(names[1]) setTimeout(function(){ hit(names[1]); }, 450); }
+  setTimeout(function(){ location.href = url; }, gc ? (names[1] ? 900 : 350) : 150);
+  setTimeout(function(){ buying = false; }, 3000);
 }
+$('buyLink').addEventListener('auxclick', function(e){ if(e.button === 1) track('buy-click'); });
 
 /* ---------- events ---------- */
 function started(){ trackOnce('tool-start'); }
@@ -866,51 +892,57 @@ function renderAll(){ renderSettings(); renderClients(); compute(); renderResult
 function dropExamples(){
   var gone = {}; S.clients.forEach(function(c){ if(c.ex) gone[c.id] = 1; });
   S.clients = S.clients.filter(function(c){ return !c.ex; }); Object.keys(gone).forEach(function(id){ delete S.ans[id]; });
-  if(S.set.rate === '60') S.set.rate = '';
+  if(S.set.exRate) S.set.rate = '';   // only the example's own rate; a rate the user typed stays
+  if(S.set.me === 'Jess' && S.set.biz === 'Bright Home Cleaning'){ S.set.me = ''; S.set.biz = ''; }
+  S.set.exRate = '';
 }
 function addClient(){
-  if(allExample()){ dropExamples(); track('example-clear'); renderAll(); }               // "+ Add" on the example = starting your own list (r1 code #2)
-  if(!isPro() && S.clients.length >= FREE_N){ proGate('More than ' + FREE_N + ' clients'); return; }
+  if(hasExample()){ dropExamples(); track('example-clear'); renderAll(); }               // "+ Add" with example rows left = starting your own list (r1/r2 code #2)
+  if(!isPro() && S.clients.length >= FREE_N){ proGate('Adding more than ' + FREE_N + ' clients'); return; }
   var c = {id:uid(), name:'', price:'', hours:'', freq:'w2', perYear:'', since:'', greet:'', oftenText:'', ex:false, check:false};
   S.clients.push(c); save(); renderClients(); compute(); renderResults(); started();
   var el = $('n_' + c.id); if(el) el.focus();
 }
 function pasteGo(){
   var res = RR.parsePaste($('pasteTxt').value), rows = res.rows, msg = $('pasteMsg');
+  if(res.error){ msg.innerHTML = '<span class="warn">' + esc(res.error) + '</span>'; return; }
   if(!rows.length){ msg.innerHTML = '<span class="warn">Couldn\'t read any clients. Each line needs a name, a price and hours.</span>'; return; }
   if(hasExample()) dropExamples();
   S.clients = S.clients.filter(function(c){ return !blank(c); });                         // the empty starter row doesn't take a free slot
   var room = isPro() ? MAX_N - S.clients.length : Math.max(0, FREE_N - S.clients.length);
   var take = rows.slice(0, room), guessed = take.filter(function(r){ return r.guessed; }).length;
-  take.forEach(function(r){ S.clients.push({id:uid(), name:r.name, price:r.price, hours:r.hours, freq:r.freq, perYear:r.perYear, since:r.since, greet:'', oftenText:r.oftenText, ex:false, check:r.guessed || (r.freq === 'x' && !r.perYear)}); });
-  save(); renderAll(); started(); track('paste-used');
+  take.forEach(function(r){ S.clients.push({id:uid(), name:r.name, price:r.price, hours:r.hours, freq:r.freq, perYear:r.perYear, since:r.since, greet:r.greet || '', oftenText:r.oftenText, addr:r.addr || '', ex:false, check:r.guessed || (r.freq === 'x' && !r.perYear)}); });
+  save(); renderAll(); started(); if(take.length) track('paste-used');
+  var noH = take.filter(function(r){ return !r.hours; }).length;
   var t = 'Added ' + take.length + ' client' + (take.length === 1 ? '' : 's') + '.';
   if(guessed) t += ' ' + guessed + ' had a "how often" this didn\'t recognise; they\'re set to every 2 weeks and marked "Check how often" in red.';
+  if(noH) t += ' ' + noH + ' have no hours yet: add them so the tool can compare with your rate.';
   if(res.bad.length) t += ' Skipped line' + (res.bad.length > 1 ? 's ' : ' ') + res.bad.slice(0, 8).join(', ') + ' (no price or hours).';
   msg.textContent = t;
-  if(take.length < rows.length){ proGate('The other ' + (rows.length - take.length) + ' clients'); }
+  if(take.length < rows.length){ proGate('Adding the other ' + (rows.length - take.length) + ' client' + (rows.length - take.length === 1 ? '' : 's')); }
   else { $('pasteTxt').value = ''; }
 }
 document.addEventListener('input', function(e){
   var t = e.target;
   if(SET_IDS.indexOf(t.id) >= 0){
-    S.set[t.id] = t.value; save(); started();
+    S.set[t.id] = t.value; if(t.id === 'rate') S.set.exRate = ''; save(); started();
     if(t.id === 'cur'){ renderClients(); $('curSym').textContent = S.set.cur; }
-    if(t.id === 'voice') $('tpl').value = tplNow();
+    if(t.id === 'voice'){ $('tpl').value = tplNow(); if(S.set.fmt === 'text' ? S.set.tplText : S.set.tplLetter) say('Your own wording is kept as you wrote it. Use "Back to the original wording" for the ' + (S.set.voice === 'we' ? 'We' : 'I') + ' version.'); }
     compute(); renderResults(); return;
   }
   if(t.id === 'reasonTxt'){ S.set.reasonTxt = t.value; save(); renderLetters(); return; }
   if(t.hasAttribute && t.hasAttribute('data-greet')){
     var gc = clientById(t.getAttribute('data-greet')), gr = gc && rowById(gc.id);
-    if(gc){ gc.greet = t.value === RR.greet(gc.name) ? '' : t.value; save(); var pre = $('lt_' + gc.id); if(pre && gr) pre.textContent = letterFor(gc, gr); trackOnce('greet-edit'); }
+    if(gc){ gc.greet = t.value; save(); var pre = $('lt_' + gc.id); if(pre && gr) pre.textContent = letterFor(gc, gr); trackOnce('greet-edit'); }
     return;
   }
+  if(t.hasAttribute && t.hasAttribute('data-addr')){ var ac = clientById(t.getAttribute('data-addr')); if(ac){ ac.addr = t.value; save(); } return; }
   if(t.id === 'tpl'){ if(S.set.fmt === 'text') S.set.tplText = t.value; else S.set.tplLetter = t.value; save(); renderLetters(); trackOnce('tpl-edit'); return; }
   var k = t.getAttribute('data-k'), card = t.closest && t.closest('.cl');
   if(k && card){
     var id = card.getAttribute('data-id');
     var wasEx = false;
-    S.clients.forEach(function(c){ if(c.id === id){ c[k] = t.value; wasEx = c.ex; c.ex = false; if(k === 'freq' || k === 'perYear') c.check = false; } });
+    S.clients.forEach(function(c){ if(c.id === id){ c[k] = t.value; if(k === 'name' || k === 'price' || k === 'hours'){ wasEx = c.ex; c.ex = false; } if(k === 'freq' || k === 'perYear') c.check = false; } });
     save(); started();
     if(wasEx){ var cardEl = $('n_' + id) && $('n_' + id).closest('.cl'); if(cardEl) cardEl.classList.remove('ex'); $('exNote').hidden = !hasExample(); }
     if(k === 'freq'){ renderClients(); var f = $('f_' + id); if(f) f.focus(); }
@@ -936,8 +968,9 @@ document.addEventListener('click', function(e){
   if(t.hasAttribute('data-copy')){ copyOne(t.getAttribute('data-copy')); return; }
   if(t.hasAttribute('data-ans')){
     var fid = t.getAttribute('data-for'), v = t.getAttribute('data-ans');
+    if((S.ans[fid] || '') === v) return;
     if(v) S.ans[fid] = v; else delete S.ans[fid];
-    save(); renderLetters(); trackOnce('status-set'); return;
+    var fc = clientById(fid); save(); renderLetters(); if(fc && !fc.ex) trackOnce('status-set'); return;
   }
   if(t.hasAttribute('data-fmt')){ S.set.fmt = t.getAttribute('data-fmt'); save(); renderSettings(); renderLetters(); if(S.set.fmt === 'text') trackOnce('fmt-text'); return; }
 });
@@ -945,7 +978,11 @@ $('reason').addEventListener('change', function(){ S.set.reason = this.value; sa
 $('proKey').addEventListener('keydown', function(e){ if(e.key === 'Enter') unlock(); });
 
 renderAll();
-try{ var seenPro = false; new IntersectionObserver(function(es){ es.forEach(function(x){ if(x.isIntersecting && !seenPro && !isPro()){ seenPro = true; track('pro-view'); } }); }).observe($('proSec')); }catch(e){}
+var scrolled = false; window.addEventListener('scroll', function(){ if(window.scrollY > 200) scrolled = true; }, {passive:true});
+try{ var seenPro = false, proT = 0; new IntersectionObserver(function(es){ es.forEach(function(x){
+  clearTimeout(proT);
+  if(x.isIntersecting && !seenPro && !isPro()) proT = setTimeout(function(){ if(!scrolled) return; seenPro = true; track('pro-view'); }, 2000);   // scrolled to it and on screen 2 s, not a page that got short
+}); }, {threshold:0.4}).observe($('proSec')); }catch(e){}
 if(GC_CODE){ var gs = document.createElement('script'); gs.async = true; gs.src = '//gc.zgo.at/count.js'; gs.setAttribute('data-goatcounter', 'https://' + GC_CODE + '.goatcounter.com/count'); document.head.appendChild(gs); }
 (function(){
   var q = new URLSearchParams(location.search);
