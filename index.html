@@ -118,6 +118,9 @@ details.tpl{margin:8px 0 14px}
 details.tpl summary{font-weight:700;cursor:pointer;min-height:36px;display:flex;align-items:center}
 .tokens{font-size:14px;color:var(--ink2)}
 .tokens code{background:#ece6d8;border-radius:4px;padding:1px 5px}
+#shareSec{margin-top:32px}
+#shareSec h2{font-size:20px;margin:0 0 6px}
+#shareSec p{margin:0 0 12px}
 #proSec{margin-top:40px;background:var(--van);color:#fff;border-radius:16px;padding:24px}
 #proSec h2{color:#fff}
 #proSec .price{font-family:Archivo,sans-serif;font-size:48px;font-weight:900;color:var(--tag)}
@@ -242,6 +245,12 @@ footer.site{margin:40px 0 30px;font-size:15px}
     </details>
     <div id="outcome" hidden></div>
     <div class="lgrid" id="lgrid"></div>
+  </section>
+
+  <section class="card share" id="shareSec" aria-labelledby="hShare">
+    <h2 id="hShare">Know another owner still charging old clients old prices?</h2>
+    <p>Send them Rate Raise. It's free for up to 8 clients, and their client list stays on their own device too.</p>
+    <button class="btn ghost small" id="btnShare">Copy a link to send them</button>
   </section>
 
   <section id="proSec" aria-labelledby="hPro">
@@ -521,12 +530,34 @@ var KEY = 'rr.v1', PROKEY = 'rr.pro', FREE_N = 8, MAX_N = 400;
 
 /* ---------- measurement (GoatCounter). The ?via code follows the visitor down the funnel (Family Formals / Handbell Chart pattern). ---------- */
 var GC_CODE = 'rateraise';
-var SRC = (function(){ try{
-  var q = new URLSearchParams(location.search), v = (q.get('via') || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 20) || (q.get('a') ? 'aff' : '');
-  if(v){ sessionStorage.setItem('rr.src', v); return v; }
-  return sessionStorage.getItem('rr.src') || '';
-}catch(e){ return ''; } })();
-var FUNNEL_EV = {'tool-start':1, 'plan-made':1, 'letter-used':1, 'status-set':1, 'paste-used':1, 'pro-view':1, 'pro-limit':1, 'buy-click':1, 'pro-unlocked':1, 'pro-gift':1};
+/* Letters (FACTORY 7, 11-25): each recipient has their own code (rrc-/rra-/rro- + 4) and a second one to pass on (code + "-s").
+   The landing event keeps the personal code (via-rrc-k7m2 / via-rrc-k7m2-s); funnel copies use the group (.rrc / .rra / .rro, and
+   .rrshare for pass-on visits) so per-letter-kind counts stay readable. A browser that came in on its own code and then opens its
+   own -s link is the recipient checking it: no via-...-s (bond-hours pattern). */
+var OWN_RE = /^(rr[cao])-[a-z0-9]{4}(-s)?$/, VIA_EV = '';
+function viaGroup(v){ var m = OWN_RE.exec(v); return m ? (m[2] ? 'rrshare' : m[1]) : v; }
+function seenVias(){ try{ var a = JSON.parse(localStorage.getItem('rr.vias') || '[]'); return Array.isArray(a) ? a : []; }catch(e){ return []; } }
+var SRC = (function(){
+  var q, v = '';
+  try{ q = new URLSearchParams(location.search); v = (q.get('via') || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 20); }catch(e){}
+  VIA_EV = v;
+  try{
+    var m = OWN_RE.exec(v), seen = seenVias();
+    if(m && !m[2] && seen.indexOf(v) < 0){ seen.push(v); localStorage.setItem('rr.vias', JSON.stringify(seen.slice(-20))); }
+    if(m && m[2] && seen.indexOf(v.slice(0, -2)) >= 0){ VIA_EV = ''; v = v.slice(0, -2); }   // own pass-on link: still their own visit
+  }catch(e){}
+  try{
+    if(!v && q && q.get('a')) v = 'aff';
+    if(v){ sessionStorage.setItem('rr.src', v); return viaGroup(v); }
+    return viaGroup(sessionStorage.getItem('rr.src') || '');
+  }catch(e){ return viaGroup(v); }
+})();
+/* the link someone passes on: their own letter code + "-s" if they came from a letter, else a plain "share" tag */
+function shareLink(){
+  var seen = seenVias(), own = seen.length ? String(seen[seen.length - 1]) : '';
+  return 'https://samsbench.com/rate-raise/?via=' + (/^rr[cao]-[a-z0-9]{4}$/.test(own) ? own + '-s' : 'share');
+}
+var FUNNEL_EV = {'tool-start':1, 'plan-made':1, 'letter-used':1, 'status-set':1, 'paste-used':1, 'pro-view':1, 'pro-limit':1, 'buy-click':1, 'pro-unlocked':1, 'pro-gift':1, 'share-copy':1};
 var ONCE = {}, QUEUE = [], SENDING = false, GC_READY = 0;
 /* One hit every 700 ms; the first waits 1.5 s after count.js loads. GoatCounter's /count takes about 4 requests/second per IP+UA
    and silently drops the rest (bizz-handbell 11-24 live test). */
@@ -960,6 +991,7 @@ document.addEventListener('click', function(e){
   if(t.id === 'btnCopyAll'){ copyAll(); return; }
   if(t.id === 'btnPrintAll'){ printAll(); return; }
   if(t.id === 'btnTplReset'){ if(S.set.fmt === 'text') S.set.tplText = ''; else S.set.tplLetter = ''; save(); renderSettings(); renderLetters(); return; }
+  if(t.id === 'btnShare'){ var L = shareLink(); copyText(L).then(function(ok){ say(ok ? 'Link copied. Paste it into an email, text or group post.' : 'Couldn\'t copy. The link is ' + L); }); trackOnce('share-copy'); return; }
   if(t.id === 'btnUnlock'){ unlock(); return; }
   if(t.id === 'buyLink'){ buyClick(e, t); return; }
   if(t.hasAttribute('data-del')){
@@ -987,12 +1019,12 @@ if(GC_CODE){ var gs = document.createElement('script'); gs.async = true; gs.src 
 (function(){
   var q = new URLSearchParams(location.search);
   var via = (q.get('via') || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 20), af = (q.get('a') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
-  if(via) track('via-' + via);
+  if(VIA_EV) track('via-' + VIA_EV);
   if(af) track('aff-' + af);
   if(q.get('bought') === '1' && !isPro()) setTimeout(function(){ $('proSec').scrollIntoView(); $('proKey').focus(); }, 400);
   if(via.indexOf('selftest') === 0 && q.get('fire') === 'all'){   // live check only: every event once, plus the .selftest copy of funnel events
     ['tool-start','plan-made','letter-used','status-set','paste-used','pro-view','pro-limit','buy-click','pro-unlocked','pro-gift',
-     'letter-copy','letters-copy-all','letters-print','csv','tpl-edit','fmt-text','example-clear','pro-notfound','round-applied','greet-edit'].forEach(function(n){ track(n); });
+     'letter-copy','letters-copy-all','letters-print','csv','tpl-edit','fmt-text','example-clear','pro-notfound','round-applied','greet-edit','share-copy'].forEach(function(n){ track(n); });
   }
 })();
 window.RRP = {state:function(){ return S; }, plan:function(){ return P; }, pending:function(){ return QUEUE.length + (SENDING ? 1 : 0); }};   // for tests
