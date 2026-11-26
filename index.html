@@ -10,6 +10,7 @@
 <meta property="og:description" content="Who to raise, by how much, how many could leave before you lose money, and a letter for each client. Free, no sign-up.">
 <meta property="og:url" content="https://samsbench.com/rate-raise/">
 <meta property="og:image" content="https://samsbench.com/rate-raise/og.png">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
@@ -239,7 +240,7 @@ footer.site{margin:40px 0 30px;font-size:15px}
     <div id="reasonBox" hidden><label for="reasonTxt">Your reason, in your words</label><input id="reasonTxt" type="text" maxlength="300"></div>
     <details class="tpl" id="tplBox">
       <summary>Change the wording</summary>
-      <textarea id="tpl" rows="11" aria-describedby="tplHelp"></textarea>
+      <textarea id="tpl" rows="11" aria-label="Letter wording" aria-describedby="tplHelp"></textarea>
       <p class="tokens" id="tplHelp">Fill-ins: <code>{first}</code> first name · <code>{old}</code> today's price · <code>{new}</code> new price · <code>{date}</code> start date · <code>{service}</code> · <code>{years}</code> how long they've been a client · <code>{reason}</code> · <code>{below}</code> "still less than new clients pay" (only where true) · <code>{me}</code> · <code>{business}</code>. Text inside <code>[[ ]]</code> disappears when a fill-in in it is empty.</p>
       <button class="btn ghost small" id="btnTplReset">Back to the original wording</button>
     </details>
